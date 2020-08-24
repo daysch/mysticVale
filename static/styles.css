@@ -1,0 +1,125 @@
+.card {
+display: grid;
+grid-template-columns: repeat(695, 1fr);
+width:10%;
+position: relative;
+float:left;
+margin:3px;
+}
+
+.selected-card {
+    padding-right:0.5%;
+    width:9%;
+    border:1px solid red;
+}
+
+.cardAdv {
+    grid-column:1/700;
+    grid-row:1;
+    z-index:1;
+}
+
+.on-deck {
+    border:2px solid black;
+    clear:both;
+    padding:3px;
+    width:9%;
+}
+
+.advancement {
+    width: 100%;
+    cursor: pointer;
+}
+
+.vale {
+    width: 22%;
+    padding-left: 1%;
+    padding-right:1%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    cursor: pointer;
+}
+
+.selected-vale {
+    border: 2px solid red;
+}
+
+.buyable-adv {
+    width: 30%;
+    padding-left: 2%;
+    padding-top: 0.5%;
+    cursor: pointer;
+}
+
+.fertile-soil {
+    width: 90%;
+    padding-left: 6%;
+    padding-top: 1.5%;
+    cursor: pointer;
+}
+
+.card-select {
+    display: flex;
+    justify-content: center;
+    padding:2px;
+    grid-column:5/700;
+    grid-row:2;
+}
+
+.card-background {
+    background: #e3fcee;
+    z-index: 0;
+}
+
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  display: none;
+  overflow: hidden;
+}
+
+.circle {
+    width:5%;
+    border-radius: 50%;
+    padding-top: 5%;
+    border: 5px solid black;
+    display: inline-block;
+}
+
+.vertical-center {
+top: 50%;
+-ms-transform: translateY(-50%);
+transform: translateY(-50%);
+}
+
+.col-container {
+  display: flex;
+  width: 100%;
+}
+.col {
+  flex: 1;
+}
+
+button {
+    z-index:100;
+    margin:2px;
+}

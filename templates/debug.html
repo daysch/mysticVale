@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Debug
+{% endblock %}
+
+{% block main %}
+    <form action="/debug" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="exec" placeholder="Debug" type="text" required/>
+        </div>
+        <button class="btn btn-primary" type="submit">Debug</button>
+    </form>
+{% endblock %}

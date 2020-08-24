@@ -1,0 +1,51 @@
+<div>{{player['name']}}'s score: {{player['score']}}</div>
+  <div class="circle" onclick="flipToken()" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
+    {% if player['is_first'] %}
+      <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
+    {% endif %}
+  </div>
+  <br>
+
+  <span class="card on-deck">
+  {% set card = player['on_deck'] %}
+    {% if card %}
+      {% for advancement in card.listify_advs() %}
+        <div class="cardAdv">
+          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% if not card and player['deck_left'] > 0 %}
+      <div class="cardAdv">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{player['color']}}_background.png" class="advancement">
+      </div>
+    {% elif not card %}
+      <div class="cardAdv">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+      </div>
+    {% else %}
+      <div class="cardAdv card-background">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+      </div>
+    {% endif %}
+  </span>
+
+  {% for card in player['field'].values() %}
+  <span class="card">
+    <div class="cardAdv card-background">
+      <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+    </div>
+    {% for advancement in card.listify_advs() %}
+    <div class="cardAdv">
+      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+    </div>
+    {% endfor %}
+  </span>
+  {% endfor %}
+<br>
+<div style="width:100%;clear:both">
+  {% for vale in player['vales'] %}
+    <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%">
+  {% endfor %}
+</div>
+<br>

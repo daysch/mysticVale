@@ -1,0 +1,149 @@
+<!Doctype>
+<html>
+<head>
+  <link rel="stylesheet" href="../static/styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="../static/script.js"></script>
+</head>
+<body>
+
+<button class="accordion">Vale Cards</button>
+<div class="panel">
+    <div style="float:left;width:50%;background:#C0C0C0">
+        <img src="../static/images/a7.png" class="vale">
+        <img src="../static/images/a7.png" class="vale">
+        <img src="../static/images/a7.png" class="vale">
+        <img src="../static/images/a7.png" class="vale">
+    </div>
+    <div style="float:right;width:50%;background:#999966">
+        <img src="../static/images/a7.png" class="vale">
+        <img src="../static/images/a7.png" class="vale">
+        <img src="../static/images/a7.png" class="vale">
+        <img src="../static/images/a7.png" class="vale">
+    </div>
+</div>
+
+<button class="accordion">Advancements</button>
+<div class="panel">
+  <div class="col-container">
+    <div class="col" style="background:#DCDCDC">
+        <img src="../static/images/aa0006.png" class="buyable-adv">
+        <img src="../static/images/aa0005.png" class="buyable-adv">
+        <img src="../static/images/aa0003.png" class="buyable-adv">
+    </div>
+    <div class="col" style="background:#F8F8F8">
+        <img src="../static/images/ab0001.png" class="buyable-adv">
+        <img src="../static/images/ab0004.png" class="buyable-adv">
+        <div style="float:right;width:29%;background:#F8F8F8" class="empty-pile-outline"><div class="empty-pile">Pile Empty</div></div>
+    </div>
+  </div>
+  <div class="col-container">
+    <div class="col" style="background:#F8F8F8">
+        <img src="../static/images/a7.png" class="buyable-adv">
+        <img src="../static/images/a7.png" class="buyable-adv">
+        <img src="../static/images/a7.png" class="buyable-adv">
+    </div>
+    <div class="col" style="background:#DCDCDC">
+        <img src="../static/images/a7.png" class="buyable-adv">
+        <img src="../static/images/a7.png" class="buyable-adv">
+        <img src="../static/images/a7.png" class="buyable-adv">
+    </div>
+  </div>
+</div>
+
+<button class="accordion">Your Field</button>
+<div class="panel">
+  <br>
+  <div style="text-align:center">
+    <br>
+    <div style="float:left" class="vertical-center">
+        <br>
+        Your score: 10
+        <br>
+        <button type="button" id="score-points">+</button>
+        <button type="button" id="lose-points">-</button>
+        <br>
+        Points left: 10
+        <br>
+        <button type="button" id="add-pts-bank">+</button>
+        <button type="button" id="sub-points-bank">-</button>
+    </div>
+    <br>
+    <div class="circle vertical-center" style="background-color:gray">
+      <img src="../static/images/star.png" style="width:100%">
+    </div>
+    <div style="float:right" class="vertical-center">
+      <button type="button" id="shuffle">Shuffle Deck</button>
+      <br>
+      <br>
+      <button type="button" id="add-to-deck">Add Selected Card to Top of Deck</button>
+    </div>
+    <br>
+    <button type="button" id="End Turn">End Turn</button>
+  </div>
+  <br>
+  <div class="image-stack">
+      <div class="on-deck card-background" style="grid-row:1"></div>
+      <div class="on-deck">
+        <div class="card-select" style="padding:2px"><button type="button" id="push">Push Card</button></div>
+      </div>
+      <div class="card0" style="border: 5px solid black;grid-row:1"></div>
+
+
+      <div class="card1 card-background" style="border:1px solid red;grid-row:1"></div>
+      <div class="card1 selected-card1" style="grid-row:1">
+        <img src="../static/images/a7.png" class="advancement">
+      </div>
+      <div class="card1 selected-card1" style="grid-row:1">
+        <img src="../static/images/a8.png" class="advancement">
+          <div class="card-select" style="padding:2px"><button type="button" id="{{card.id}}">Select Card</button></div>
+      </div>
+      <div class="card2 card-background" style="grid-row:1">
+      </div>
+      <div class="card2" style="grid-row:1">
+        <img src="../static/images/a7.png" class="advancement">
+      </div>
+      <div class="card2" style="grid-row:1">
+        <img src="../static/images/a8.png" class="advancement">
+      </div>
+      <div class="card3 card-background" style="grid-row:1">
+      </div>
+      <div class="card3" style="grid-row:1">
+        <img src="../static/images/a7.png" class="advancement">
+      </div>
+      <div class="card3" style="grid-row:1">
+        <img src="../static/images/a8.png" class="advancement">
+      </div>
+      <div class="card4 card-background" style="grid-row:1">
+      </div>
+      <div class="card4" style="grid-row:1">
+        <img src="../static/images/a7.png" class="advancement">
+      </div>
+      <div class="card4" style="grid-row:1">
+        <img src="../static/images/a8.png" class="advancement">
+      </div>
+      <div class="card5 card-background" style="grid-row:1">
+      </div>
+      <div class="card5" style="grid-row:1">
+        <img src="../static/images/a7.png" class="advancement">
+      </div>
+      <div class="card5" style="grid-row:1">
+        <img src="../static/images/a8.png" class="advancement">
+      </div>
+      <div class="card6 card-background" style="grid-row:1">
+      </div>
+      <div class="card6" style="grid-row:1">
+        <img src="../static/images/a7.png" class="advancement">
+      </div>
+      <div class="card6" style="grid-row:1">
+        <img src="../static/images/a8.png" class="advancement">
+      </div>
+  </div>
+</div>
+
+<script>
+    createAccordion()
+</script>
+
+</body>
+</html>

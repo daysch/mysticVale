@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Waiting Room
+{% endblock %}
+
+{% block main %}
+    Choose a leader to use:
+    <br>
+    {% for leader in leaders %}
+        <div style="width:25%;float:left">
+            <img class="advancement" src="https://flaskdixit.files.wordpress.com/2020/08/{{leader}}.png" onclick="setLeader('{{leader}}')">
+        </div>
+    {% endfor %}
+    <div style="clear:both"></div>
+    {% for opposite in opposites %}
+        <div style="width:25%;float:left">
+            <img style=width:100% src="https://flaskdixit.files.wordpress.com/2020/08/{{opposite}}.png">
+        </div>
+    {% endfor %}
+
+{% endblock %}

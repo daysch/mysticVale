@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Waiting Room
+{% endblock %}
+
+{% block main %}
+    {% if session.id %}
+    Choose a color:
+        <select name="color" id="color">
+          <option value="">Random</option>
+          <option value="red">Red</option>
+          <option value="green">Green</option>
+          <option value="blue">Blue</option>
+          <option value="yellow">Vomit Yellow</option>
+        </select>
+        <br>
+        <input type="checkbox" id="leaders" name='leaders' {{'checked' if leaders}}>
+        <label for="leaders">Play with leaders</label>
+        <br>
+        <a href="/play" class="btn btn-primary">Start Game </a>
+    {% endif %}
+    <br>
+    <br>
+    Players ({{players|length}}):
+    {% for name in players %}
+        <br>
+        {{name}}
+
+    {% endfor %}
+
+<script>
+    // Will execute every 1 second
+    var intervalID = window.setInterval(check_server, 1000);
+
+    function check_server() {
+        $.get('/waiting',function(data) {
+            if (data) {
+                window.location.replace('/wait');
+            }
+        });
+    }
+
+    // select color
+    $('#color').change(function() {
+         $.get('/action',{'action':'set_color','color':$(this).children("option:selected").val()},function() {});
+    });
+
+    // select leaders
+    $('#leaders').change(function() {
+         $.get('/action',{'action':'set_leaders','using_leaders':$('#leaders').is(':checked')},function() {});
+    });
+</script>
+
+{% endblock %}
