@@ -5,63 +5,65 @@
 {% endblock %}
 
 {% block main %}
-{% if state['players_turn'] %}
-  {% set player = state['players_turn'] %}
-  <button class="accordion active">{{player['name']}}'s Field</button>
-  <div class="panel" id="players-turn" style="display:block">
-      <div>{{player['name']}}'s score: {{player['score']}}</div>
-      <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
-        {% if player['is_first'] %}
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
-        {% endif %}
-      </div>
-      <br>
+<div id="players-turn">
+  {% if state['players_turn'] %}
+    {% set player = state['players_turn'] %}
+    <button class="accordion active">{{player['name']}}'s Field</button>
+    <div class="panel" id="player{{player['id']}}" style="display:block">
+        <div>{{player['name']}}'s score: {{player['score']}}</div>
+        <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
+          {% if player['is_first'] %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
+          {% endif %}
+        </div>
+        <br>
 
-      <span class="card on-deck">
-      {% set card = player['on_deck'] %}
-        {% if card %}
-          {% for advancement in card.listify_advs() %}
+        <span class="card on-deck">
+        {% set card = player['on_deck'] %}
+          {% if card %}
+            {% for advancement in card.listify_advs() %}
+              <div class="cardAdv">
+                <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+              </div>
+            {% endfor %}
+          {% endif %}
+          {% if not card and player['deck_left'] > 0 %}
             <div class="cardAdv">
-              <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+              <img src="https://flaskdixit.files.wordpress.com/2020/08/{{player['color']}}_background.png" class="advancement">
             </div>
-          {% endfor %}
-        {% endif %}
-        {% if not card and player['deck_left'] > 0 %}
-          <div class="cardAdv">
-            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{player['color']}}_background.png" class="advancement">
-          </div>
-        {% elif not card %}
-          <div class="cardAdv">
-            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-          </div>
-        {% else %}
+          {% elif not card %}
+            <div class="cardAdv">
+              <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+            </div>
+          {% else %}
+            <div class="cardAdv card-background">
+              <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+            </div>
+          {% endif %}
+        </span>
+
+        {% for card in player['field'].values() %}
+        <span class="card">
           <div class="cardAdv card-background">
             <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
           </div>
-        {% endif %}
-      </span>
-
-      {% for card in player['field'].values() %}
-      <span class="card">
-        <div class="cardAdv card-background">
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-        </div>
-        {% for advancement in card.listify_advs() %}
-        <div class="cardAdv">
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
-        </div>
+          {% for advancement in card.listify_advs() %}
+          <div class="cardAdv">
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+          </div>
+          {% endfor %}
+        </span>
         {% endfor %}
-      </span>
-      {% endfor %}
-    <br>
-    <div style="width:100%;clear:both">
-      {% for vale in player['vales'] %}
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%">
-      {% endfor %}
+      <br>
+      <div style="width:100%;clear:both">
+        {% for vale in player['vales'] %}
+          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%">
+        {% endfor %}
+      </div>
+      <br>
     </div>
-    <br>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
 
 
 
@@ -282,62 +284,64 @@
 </div>
 </div>
 
-{% for player in state['other_players'] %}
-<button class="accordion">{{player['name']}}'s Field</button>
-<div class="panel" id="purgatory">
-    <div>{{player['name']}}'s score: {{player['score']}}</div>
-    <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
-      {% if player['is_first'] %}
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
-      {% endif %}
-    </div>
-    <br>
+<div id = "other-players">
+  {% for player in state['other_players'] %}
+  <button class="accordion">{{player['name']}}'s Field</button>
+  <div class="panel" id="purgatory">
+      <div>{{player['name']}}'s score: {{player['score']}}</div>
+      <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
+        {% if player['is_first'] %}
+          <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
+        {% endif %}
+      </div>
+      <br>
 
-    <span class="card on-deck">
-    {% set card = player['on_deck'] %}
-      {% if card %}
-        {% for advancement in card.listify_advs() %}
+      <span class="card on-deck">
+      {% set card = player['on_deck'] %}
+        {% if card %}
+          {% for advancement in card.listify_advs() %}
+            <div class="cardAdv">
+              <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+            </div>
+          {% endfor %}
+        {% endif %}
+        {% if not card and player['deck_left'] > 0 %}
           <div class="cardAdv">
-            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{player['color']}}_background.png" class="advancement">
           </div>
-        {% endfor %}
-      {% endif %}
-      {% if not card and player['deck_left'] > 0 %}
-        <div class="cardAdv">
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{player['color']}}_background.png" class="advancement">
-        </div>
-      {% elif not card %}
-        <div class="cardAdv">
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-        </div>
-      {% else %}
+        {% elif not card %}
+          <div class="cardAdv">
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+          </div>
+        {% else %}
+          <div class="cardAdv card-background">
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+          </div>
+        {% endif %}
+      </span>
+
+      {% for card in player['field'].values() %}
+      <span class="card">
         <div class="cardAdv card-background">
           <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
         </div>
-      {% endif %}
-    </span>
-
-    {% for card in player['field'].values() %}
-    <span class="card">
-      <div class="cardAdv card-background">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-      </div>
-      {% for advancement in card.listify_advs() %}
-      <div class="cardAdv">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
-      </div>
+        {% for advancement in card.listify_advs() %}
+        <div class="cardAdv">
+          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+        </div>
+        {% endfor %}
+      </span>
       {% endfor %}
-    </span>
-    {% endfor %}
-  <br>
-  <div style="width:100%;clear:both">
-    {% for vale in player['vales'] %}
-      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%">
-    {% endfor %}
+    <br>
+    <div style="width:100%;clear:both">
+      {% for vale in player['vales'] %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%">
+      {% endfor %}
+    </div>
+    <br>
   </div>
-  <br>
+  {% endfor %}
 </div>
-{% endfor %}
 
 <br>
 <button type="button" id="toggle-deck" onclick="toggleDeck()">Show Your Deck</button>
@@ -352,28 +356,37 @@
 
 <script>
     // Will execute every 1 second
+    player_ids = {{state['player_ids']}}
     var intervalID = window.setInterval(check_server, 1000);
 
     function check_server() {
-        $.get('/update',function(data) {
-            if (!data) {
-                return
-            }
-
+        player = player_ids[0]
+        $.get('/update',{'player':player},function(data) {
             // current player's turn
-            if (!data.field) {
+            if (data.reload) {
               if (window.confirm("It's your turn! Click okay to reload the page.")) {
                 window.location.replace('/play');
               }
             }
 
-            // need to update opposing player's field
-            else {
-              hidden = $('#players-turn').is(':hidden');
-              $('#players-turn').html(data.field);
+            // need to update everyone's fields
+            else if (data.turn_field) {
+              $('#players-turn').html(data.turn_field)
+              $('#other-players').html(data.all_players_field)
+            }
+
+            // need to update one player's field
+            else if (data.requested_field) {
+              hidden = $(`#player${player}`).is(':hidden');
+              $(`#player${player}`).html(data.requested_field);
+              console.log('updated')
               if (!hidden) {
-                $('#players-turn').display = block;
-                $('#players-turn').prev().removeClass('active')
+                $(`#player${player}`).display = 'block';
+                $(`#player${player}`).prev().removeClass('active');
+              }
+              else {
+                 $(`#player${player}`).display = 'none';
+                $(`#player${player}`).prev().addClass('active');
               }
             }
         });

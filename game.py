@@ -64,6 +64,7 @@ class Player:
         self.on_deck = None
         self.is_first = False
         self.leader = None
+        self.turn_status = 0
 
     def new_game(self):
         self.deck = [Card('c' + str(i)) for i in range(8)] + \
@@ -82,11 +83,15 @@ class Player:
         if not self.color:
             self.color = random.choice(COLORS)
         self.is_first = False
+        self.turn_status = 0
 
     def play_on_deck(self):
         # if no on deck card (via html glitch), do nothing
         if not self.on_deck:
             return None
+
+        # update turn status
+        self.turn_status += 1
 
         # add card to field
         self.field[self.on_deck.id] = self.on_deck
@@ -100,6 +105,9 @@ class Player:
         # if no cards left, can't draw
         if not self.discard and not self.deck:
             return None
+
+        # update turn status
+        self.turn_status += 1
 
         # if dont already have on deck card (no glitch in html), draw
         if not self.on_deck:
@@ -115,6 +123,10 @@ class Player:
             self.deck.append(self.on_deck)
         self.on_deck = None
         random.shuffle(self.deck)
+
+        # update turn status
+        self.turn_status += 1
+
         return self.color
 
     def make_on_deck(self,card):
@@ -122,21 +134,39 @@ class Player:
             self.deck.append(self.on_deck)
         self.on_deck = card
 
+        # update turn status
+        self.turn_status += 1
+
     def make_deck_bottom(self,card):
         self.deck.insert(0,card)
+
+        # update turn status
+        self.turn_status += 1
 
     def flip_token(self):
         self.token = not self.token
 
+        # update turn status
+        self.turn_status += 1
+
     def add_vale(self,vale):
         self.vales[vale] = vale
+
+        # update turn status
+        self.turn_status += 1
 
     def add_advancement(self,card,advancement):
         self.field[card].add(advancement)
 
+        # update turn status
+        self.turn_status += 1
+
     def discard_field(self):
         self.discard.extend(list(self.field.values()))
         self.field = dict()
+
+        # update turn status
+        self.turn_status += 1
 
     def deck_cards(self):
         return [card.id for card in self.deck]
@@ -154,11 +184,20 @@ class Player:
         else:
             raise Exception('Invalid discard attempt')
 
+        # update turn status
+        self.turn_status += 1
+
     def discard_vale(self,vale):
         del self.vales[vale]
 
+        # update turn status
+        self.turn_status += 1
+
     def score_points(self,points):
         self.points += points
+
+        # update turn status
+        self.turn_status += 1
 
     def set_color(self,color):
         self.color = color
@@ -173,7 +212,14 @@ class Player:
         del self.field['c0'].advancements[self.leader]
         self.leader = self.leader[0:5] + ('b' if self.leader[5] == 'a' else 'a')
         self.field['c0'].advancements[self.leader] = self.leader
+
+        # update turn status
+        self.turn_status += 1
         return self.leader
+
+    def end_turn(self):
+        self.discard_field()
+        self.turn_status = 0
 
 class Game:
     def __init__(self):
@@ -181,7 +227,6 @@ class Game:
         self.next_id = 1
         self.players_turn = 0
         self.in_progress = False
-        self.turn_status = None
         self.using_leaders = False
 
         self.adv_ones = []
@@ -223,12 +268,10 @@ class Game:
         self.players_turn = random.choice(list(self.players.keys()))
         self.players[self.players_turn].is_first = True
         self.in_progress = True
-        self.turn_status = [self.players_turn,0]
 
     # move items places
     def move(self,item,source,destination,player,source_card=None):
         return_value = (None, item)
-        self.turn_status[1] += 1
 
         # buying advancement
         if source == 'adv_deck' and destination[0] == 'c':
@@ -322,20 +365,20 @@ class Game:
                 'random_deck':list(np.random.permutation(self.players[id].deck)),
                 'adv_ones_left':len(self.adv_ones) - 3,
                 'using_leaders':self.using_leaders,
-                'players_turn':None if pt.id == id else {'name':pt.name, 'field':pt.field, 'on_deck':pt.on_deck, 'vales':pt.vales,
-                                   'deck_left':len(pt.deck),'color':pt.color,'flipped':pt.token,
-                                   'is_first':pt.is_first,'id':pt.id, 'score':pt.points},
-                'other_players': [{'name':player.name, 'field':player.field, 'on_deck':player.on_deck, 'vales':player.vales,
-                                   'deck_left':len(player.deck),'color':player.color,'flipped':player.token,
-                                   'is_first':player.is_first, 'score':player.points}
-                                  for player in self.players.values() if player.id != id and player.id != self.players_turn]}
+                'player_ids': [player for player in self.players if player != id],
+                'players_turn':None if pt.id == id else self.get_other_state(pt.id),
+                'other_players': [self.get_other_state(player) for player in self.players if player != id and player != self.players_turn]}
+
+    def get_other_state(self, id):
+        player = self.players[int(id)]
+        return {'name':player.name, 'field':player.field, 'on_deck':player.on_deck, 'vales':player.vales,
+                'deck_left':len(player.deck),'color':player.color,'flipped':player.token,
+                'is_first':player.is_first, 'score':player.points, 'id':player.id}
 
     def get_players(self):
         return [player.name for player in self.players.values()]
 
     def add_advancement(self,player,card,advancement):
-        self.turn_status[1] += 1
-
         # initiate return value
         remainder = None
 
@@ -360,8 +403,6 @@ class Game:
         return remainder, advancement
 
     def add_vale(self, player, vale):
-        self.turn_status[1] += 1
-
         # give vale card to player
         self.players[player].add_vale(vale)
 
@@ -375,7 +416,7 @@ class Game:
 
     def end_turn(self,player):
         # discard field
-        self.players[player].discard_field()
+        self.players[player].end_turn()
 
         if self.players_turn != player:
             return
@@ -383,27 +424,22 @@ class Game:
         # update whose turn
         idx = (list(self.players.keys()).index(self.players_turn) + 1) % len(self.players)
         self.players_turn = list(self.players.keys())[idx]
-        self.turn_status = [self.players_turn, 0]
 
     def end_game(self):
         self.players = dict()
         self.in_progress = False
 
     def play_on_deck(self,player):
-        self.turn_status[1] += 1
         return self.players[player].play_on_deck()
 
     def flip(self,player):
-        self.turn_status[1] += 1
         return self.players[player].flip()
 
     def flip_token(self, player):
-        self.turn_status[1] += 1
         self.players[player].flip_token()
         return True
 
     def score_points(self,player,points):
-        self.turn_status[1] += 1
         self.players[player].score_points(points)
         self.add_points(-points)
         return self.players[player].points, self.points_left
@@ -412,18 +448,22 @@ class Game:
         self.players[player].set_color(color)
 
     def discard_vale(self,player,vale,source):
-        self.turn_status[1] += 1
         if source == 'vales':
             self.players[player].discard_vale(vale)
         else:
             del self.purgatory['others'][vale]
 
     def shuffle(self,player):
-        self.turn_status[1] += 1
         return self.players[player].shuffle()
 
-    def get_turn_status(self):
-        return self.turn_status
+    def get_turn_statuses(self):
+        return {str(id):self.get_turn_status(id) for id in self.players}
+
+    def get_turn_status(self,id):
+        return self.players[int(id)].turn_status
+
+    def get_players_turn(self):
+        return self.players_turn
 
     def set_leaders(self,using_leaders):
         self.using_leaders = using_leaders == 'true'
@@ -432,7 +472,6 @@ class Game:
         return self.players[id].set_leader(leader)
 
     def flip_leader(self, id):
-        self.turn_status[1] += 1
         return self.players[id].flip_leader()
 
     def leader_options(self,id):

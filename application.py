@@ -71,7 +71,9 @@ def play():
         (leaders, opposites) = gamer.leader_options(session['id'])
         return render_template('leaders.html',leaders=leaders,opposites=opposites)
 
-    session['known_turn_status'] = gamer.get_turn_status()
+    for id, status in gamer.get_turn_statuses().items():
+        session[f'p{str(id)}_status'] = status
+    session['known_players_turn'] = gamer.get_players_turn()
     return render_template('game.html', state=gamer.get_state(session['id']))
 
 @app.route("/waiting")
@@ -130,17 +132,38 @@ def action():
 
 @app.route('/update')
 def update():
-    # no change
-    turn_status = gamer.get_turn_status()
-    if session['known_turn_status'] == turn_status or (turn_status[0] == session['id'] and turn_status[1] != 0):
-        return jsonify(None)
+    requested_player = str(request.args.get('player'))
+    players_turn = gamer.get_players_turn()
+    turn_status = gamer.get_turn_status(requested_player)
 
-    session['known_turn_status'] = turn_status
-    player = gamer.get_state(session['id'])['players_turn']
-    # current player is now requester
-    if not player:
-        return jsonify({'status':session['known_turn_status'],'field':None})
-    return jsonify({'status':session['known_turn_status'],'field':render_template('field.html',player=player)})
+    # no change
+    if session['known_players_turn'] == players_turn and session[f'p{requested_player}_status'] == turn_status:
+        return jsonify({'turn_field':None,'all_players_field':None,'requested_field':None,'reload':False})
+
+    # current players turn
+    if session['known_players_turn'] != players_turn and players_turn == session['id']:
+        session['known_players_turn'] = players_turn
+        return jsonify({'turn_field':None,'all_players_field':None,'requested_field':None,'reload':True})
+
+    # new players turn, update all
+    if session['known_players_turn'] != players_turn:
+        # update known info
+        session['known_players_turn'] = players_turn
+        for id, status in gamer.get_turn_statuses().items():
+            session[f'p{str(id)}_status'] = status
+
+        # get field data
+        state = gamer.get_state(session['id'])
+        return jsonify({'turn_field':render_template('field.html',player=state['players_turn'],replace_all=True),
+                       'all_players_field':''.join([render_template('field.html',player=player,replace_all=True)
+                                                     for player in state['other_players']])
+                        })
+
+    # just one player to update
+    player = gamer.get_other_state(requested_player)
+    session[f'p{requested_player}_status'] = turn_status
+    return jsonify({'requested_field':render_template('field.html',player=player,replace_all=False),
+                    'turn_field':None,'all_players_field':None,'reload':False})
 
 @app.route("/debug",methods=["GET","POST"])
 def debug():
