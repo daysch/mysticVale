@@ -34,6 +34,7 @@ function deselectSelection() {
 
     // disable button
     $('#add-to-deck').prop('disabled',true);
+    $('#add-to-deck-bottom').prop('disabled',true);
     $('#discard-card').prop('disabled',true);
     $('#deselect').prop('disabled',true);
     $('#discard-vale').prop('disabled',true);
@@ -197,6 +198,7 @@ function selectCard(card_id, location) {
 
         // enable buttons
         $('#add-to-deck').removeAttr('disabled');
+        $('#add-to-deck-bottom').removeAttr('disabled');
         $('#discard-card').removeAttr('disabled');
         $('#deselect').removeAttr('disabled');
         $('#move-to-purgatory').removeAttr('disabled');
@@ -258,6 +260,12 @@ function discardVale() {
 
 function addToDeck() {
     $.get('/move', {'source':source,'item':selection,'destination':'deck','source_card':null}, function() {
+        window.location.replace('/play');
+    });
+}
+
+function addToDeckBottom() {
+    $.get('/move', {'source':source,'item':selection,'destination':'deck_bottom','source_card':null}, function() {
         window.location.replace('/play');
     });
 }

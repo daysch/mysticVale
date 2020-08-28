@@ -122,6 +122,9 @@ class Player:
             self.deck.append(self.on_deck)
         self.on_deck = card
 
+    def make_deck_bottom(self,card):
+        self.deck.insert(0,card)
+
     def flip_token(self):
         self.token = not self.token
 
@@ -257,6 +260,10 @@ class Game:
             item = source.pop(item) if isinstance(source,dict) else source.pop([card.id for card in source].index(item))
             self.players[player].make_on_deck(item)
             return
+        if destination == 'deck_bottom':
+            item = source.pop(item) if isinstance(source,dict) else source.pop([card.id for card in source].index(item))
+            self.players[player].make_deck_bottom(item)
+            return
         if destination == 'discard':
             if item in self.purgatory['cards']:
                 self.players[player].discard_card(self.purgatory['cards'].pop(item))
@@ -311,7 +318,8 @@ class Game:
                 'color':self.players[id].color,
                 'flipped':self.players[id].token,
                 'is_first':self.players[id].is_first,
-                'deck':list(np.random.permutation(self.players[id].deck)),
+                'deck':self.players[id].deck,
+                'random_deck':list(np.random.permutation(self.players[id].deck)),
                 'adv_ones_left':len(self.adv_ones) - 3,
                 'using_leaders':self.using_leaders,
                 'players_turn':None if pt.id == id else {'name':pt.name, 'field':pt.field, 'on_deck':pt.on_deck, 'vales':pt.vales,

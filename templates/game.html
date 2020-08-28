@@ -108,7 +108,7 @@
                 <img src="https://flaskdixit.files.wordpress.com/2020/08/{{fs}}.png" class="fertile-soil" id="{{fs}}" onclick="selectAdv('{{fs}}','adv_deck')">
                 <figcaption style="text-align:center">{{state['fertile_soils'][fs]}} left</figcaption>
             {% else %}
-                <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png">
+                <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="fertile-soil">
             {% endif %}
           </div>
         {% endfor %}
@@ -137,11 +137,11 @@
     <div style="float:right">
       <button type="button" id="shuffle" onclick="shuffle()">Shuffle Deck</button>
       <br>
-      <button type="button" id="add-to-deck" disabled onclick="addToDeck()">Add card to top of deck</button>
+      <button type="button" id="add-to-deck" disabled onclick="addToDeck()">Move card to top of deck</button>
+      <br>
+      <button type="button" id="add-to-deck-bottom" disabled onclick="addToDeckBottom()">Move card to bottom of deck</button>
       <br>
       <button type="button" id="discard-card" disabled onclick="discardCard()">Discard card</button>
-      <br>
-      <button type="button" onclick="discardField()">Discard field</button>
       <br>
       <button type="button" id="deselect" disabled onclick="deselectSelection()">Deselect</button>
       {% if state['using_leaders'] %}
@@ -215,6 +215,8 @@
 <button class="accordion">Your Discard ({{state['discard']|length}} card{{'s' if state['discard']|length != 1}})</button>
 <div class="panel" id="discard">
   <br>
+  <button type="button" onclick="discardField()">Discard field</button>
+  <br>
     {% for card in state['discard'] %}
     <span class="card">
       <div class="cardAdv card-background">
@@ -283,6 +285,7 @@
 {% for player in state['other_players'] %}
 <button class="accordion">{{player['name']}}'s Field</button>
 <div class="panel" id="purgatory">
+    <div>{{player['name']}}'s score: {{player['score']}}</div>
     <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
       {% if player['is_first'] %}
         <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
