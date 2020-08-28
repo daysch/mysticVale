@@ -284,10 +284,10 @@
 </div>
 </div>
 
-<div id = "other-players">
+<div id="other-players">
   {% for player in state['other_players'] %}
   <button class="accordion">{{player['name']}}'s Field</button>
-  <div class="panel" id="purgatory">
+  <div class="panel" id="player{{player['id']}}">
       <div>{{player['name']}}'s score: {{player['score']}}</div>
       <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
         {% if player['is_first'] %}
@@ -352,44 +352,13 @@
     var source = null;
     var selection = null;
     var source_card = null;
+    var player_ids = {{state['player_ids']}}
 </script>
 
 <script>
     // Will execute every 1 second
-    player_ids = {{state['player_ids']}}
+
     var intervalID = window.setInterval(check_server, 1000);
 
-    function check_server() {
-        player = player_ids[0]
-        $.get('/update',{'player':player},function(data) {
-            // current player's turn
-            if (data.reload) {
-              if (window.confirm("It's your turn! Click okay to reload the page.")) {
-                window.location.replace('/play');
-              }
-            }
-
-            // need to update everyone's fields
-            else if (data.turn_field) {
-              $('#players-turn').html(data.turn_field)
-              $('#other-players').html(data.all_players_field)
-            }
-
-            // need to update one player's field
-            else if (data.requested_field) {
-              hidden = $(`#player${player}`).is(':hidden');
-              $(`#player${player}`).html(data.requested_field);
-              console.log('updated')
-              if (!hidden) {
-                $(`#player${player}`).display = 'block';
-                $(`#player${player}`).prev().removeClass('active');
-              }
-              else {
-                 $(`#player${player}`).display = 'none';
-                $(`#player${player}`).prev().addClass('active');
-              }
-            }
-        });
-    }
 </script>
 {% endblock %}

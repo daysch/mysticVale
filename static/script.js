@@ -393,3 +393,45 @@ function discardField() {
         window.location.replace('/play');
     });
 }
+
+function check_server() {
+    for (player of player_ids) {
+        $.ajax({
+             url: '/update',
+             async: false,
+             type: 'GET',
+             data : {'player':player},
+             success: function(data) {
+                // current player's turn
+                if (data.reload) {
+                  if (window.confirm("It's your turn! Click okay to reload the page.")) {
+                    window.location.replace('/play');
+                  }
+                }
+
+                // need to update everyone's fields
+                else if (data.turn_field) {
+                  $('#players-turn').html(data.turn_field)
+                  $('#other-players').html(data.all_players_field)
+                }
+
+                // need to update one player's field
+                else if (data.requested_field) {
+                  hidden = $(`#player${player}`).is(':hidden');
+                  $(`#player${player}`).html(data.requested_field);
+                  console.log(`#player${player}`)
+                  console.log($(`#player${player}`));
+                  console.log(player)
+                  if (!hidden) {
+                    $(`#player${player}`).display = 'block';
+                    $(`#player${player}`).prev().removeClass('active');
+                  }
+                  else {
+                     $(`#player${player}`).display = 'none';
+                    $(`#player${player}`).prev().addClass('active');
+                  }
+                }
+             }
+        });
+    }
+}
