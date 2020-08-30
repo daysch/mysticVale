@@ -181,6 +181,7 @@ class Player:
             self.discard.append(self.field.pop(card))
         elif card in self.deck_cards():
             self.discard.append(self.deck.pop(self.deck_cards().index(card)))
+            self.shuffle()
         else:
             raise Exception('Invalid discard attempt')
 

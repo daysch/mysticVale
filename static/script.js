@@ -1,5 +1,32 @@
+// setup page
+function setup() {
+    createAccordion();
+    setup_modal();
+    window.setInterval(check_server, 1000);
+}
+
+function setup_modal() {
+    // modal boxes on right click of image
+    // Get the modal
+    var modal = document.getElementById("myModal");
+    var modalImg = document.getElementById("modalImg");
+
+    // Get the image and insert it inside the modal when img is right clicked
+    $('img').bind('contextmenu', function() {
+        event.preventDefault();
+        modal.style.display = "block";
+        modalImg.src = this.src;
+    });
+
+    // When the user clicks anywhere, close the modal
+    modal.onclick = function() {
+      modal.style.display = "none";
+    };
+
+}
+
 // Return selected item to original state
-function deselectSelection() {
+function deselectSelection(move_to_back = true) {
     if (!selection) {
         return;
     }
@@ -13,7 +40,9 @@ function deselectSelection() {
     else if (selection[0] == 'a' && source_card) {
         var adv_elmt = $('#player').find('#'+selection);
         adv_elmt.css('background','');
-        adv_elmt.parent().children().first().after(adv_elmt);
+        if (move_to_back) {
+            adv_elmt.parent().children().first().after(adv_elmt);
+        }
     }
 
     // deselect purgatory advancement
@@ -36,6 +65,7 @@ function deselectSelection() {
     $('#add-to-deck').prop('disabled',true);
     $('#add-to-deck-bottom').prop('disabled',true);
     $('#discard-card').prop('disabled',true);
+    $('#discard-card-deck').prop('disabled',true);
     $('#deselect').prop('disabled',true);
     $('#discard-vale').prop('disabled',true);
     $('#move-to-vales').prop('disabled',true);
@@ -172,17 +202,17 @@ function selectCard(card_id, location) {
         else {
             $.get('/move', {'source':source, 'item':selection, 'destination':card_id, 'source_card':source_card}, function() {
             advancement = $('#player').find('#'+selection);
-            advancement.attr('onclick',`selCardAdv('${card_id}','${location})`);
+            advancement.find('img').attr('onclick',`selCardAdv('${card_id}','${location}')`);
             if (source != 'purgatory') {
                 $('#player').find('#'+card_id).parent().before(advancement);
             }
             else {
-                $('#player').find('#'+selection).remove()
+                $('#player').find('#'+selection).remove();
                 $('#player').find('#'+card_id).parent().before(`<div class="cardAdv" id="${selection}">
                                         <img src="https://flaskdixit.files.wordpress.com/2020/08/${selection.slice(0,6)}.png" class="advancement" onclick="selCardAdv('${card_id}','${location}')">
                                        </div>`);
             }
-            deselectSelection();
+            deselectSelection(false);
         });}
 
     }
@@ -200,6 +230,7 @@ function selectCard(card_id, location) {
         $('#add-to-deck').removeAttr('disabled');
         $('#add-to-deck-bottom').removeAttr('disabled');
         $('#discard-card').removeAttr('disabled');
+        $('#discard-card-deck').removeAttr('disabled');
         $('#deselect').removeAttr('disabled');
         $('#move-to-purgatory').removeAttr('disabled');
     }
@@ -419,9 +450,6 @@ function check_server() {
                 else if (data.requested_field) {
                   hidden = $(`#player${player}`).is(':hidden');
                   $(`#player${player}`).html(data.requested_field);
-                  console.log(`#player${player}`)
-                  console.log($(`#player${player}`));
-                  console.log(player)
                   if (!hidden) {
                     $(`#player${player}`).display = 'block';
                     $(`#player${player}`).prev().removeClass('active');
