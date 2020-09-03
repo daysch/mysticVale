@@ -112,11 +112,9 @@ def move():
 @app.route("/action")
 def action():
     if request.args.get('action') == 'push':
-        return jsonify(gamer.play_on_deck(session['id']))
+        gamer.play_on_deck(session['id'])
     elif request.args.get('action') == 'flip':
-        data = gamer.flip(session['id'])
-        if not data['shuffled']:
-            return jsonify(data)
+        gamer.flip(session['id'])
     elif request.args.get('action') == 'end_turn':
         return jsonify(gamer.end_turn(session['id']))
     elif request.args.get('action') == 'flip_token':

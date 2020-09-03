@@ -79,44 +79,7 @@ function deselectSelection(move_to_back = true) {
 
 function pushCard() {
     $.get('/action', {'action':'push'}, function(data) {
-        // select card
-        var on_deck = $('#player').find(".on-deck");
-        on_deck.removeClass('on-deck');
-
-        // update button
-        var button =  on_deck.find('button');
-        button.attr('onclick',`selectCard('${button.attr('id')}','field')`);
-        button.html(`^Select Card`);
-
-
-        // add on deck image
-        if (data.color) {
-            on_deck.before(`<span class="card on-deck">
-                                <div class="cardAdv">
-                                    <img src="https://flaskdixit.files.wordpress.com/2020/08/${data.color}_background.png" class="advancement">
-                                </div>
-                                <div class="card-select">
-                                    <button type="button" onclick="flipCard()" id="flip">Flip (${data.remaining} Left)</button>
-                                </div>
-                            </span>`);
-        }
-        else {
-            on_deck.before(`<span class="card on-deck">
-                                <div class="cardAdv">
-                                    <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-                                </div>
-                                <div class="card-select"><button type="button" onclick="flipCard()" id="flip">Shuffle and Flip</button></div>
-                            </span>`);
-        }
-        // update advancement clickability
-        on_deck.find('img').each(function(){
-            $(this).attr('onclick',`selCardAdv('${on_deck.find('button').attr('id')}','field')`);
-
-        });
-
-        // put card in field
-        parent = on_deck.parent();
-        parent.append(on_deck.first());
+        replaceHTML(data,['field','deck-display','discard']);
     });
 }
 
@@ -132,24 +95,7 @@ function flipCard() {
             return;
         }
 
-        // move card from (hidden) deck
-        var on_deck = $('#field').find('.on-deck');
-        new_on_deck = $('#deck .panel').find('.card').last();
-
-        // just shuffled
-        if (data.full_html) {
-            replaceHTML(data);
-            return;
-        }
-        on_deck.before(new_on_deck);
-
-        on_deck.remove();
-        // update card
-        var id = new_on_deck.find('button').attr('id');
-        new_on_deck.find('img').attr('onclick',`"selCardAdv('${id}','field')"`);
-        new_on_deck.addClass('on-deck');
-        new_on_deck.find('button').attr('onclick','pushCard()');
-        new_on_deck.find('button').html(`Push (${data.remaining} left)`);
+        replaceHTML(data,['field','deck-display','discard']);
     });
 }
 
