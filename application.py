@@ -95,14 +95,28 @@ def buy():
 
 @app.route("/move")
 def move():
-    return jsonify(gamer.move(request.args.get('item'),request.args.get('source'),request.args.get('destination'),session['id'],request.args.get('source_card')))
-
+    data = gamer.move(request.args.get('item'),request.args.get('source'),request.args.get('destination'),session['id'],request.args.get('source_card'))
+    if data:
+        return jsonify(data)
+    else:
+        state = gamer.get_state(session['id'])
+        return jsonify({'full_html':render_template('game.html', state=state),
+                    'deck-display':render_template('deck.html', state=state),
+                    'discard':render_template('discard.html', state=state),
+                    'field':render_template('own_field.html', state=state),
+                    'vales':render_template('own_vales.html', state=state),
+                    'purgatory':render_template('purgatory.html', state=state),
+                    'num_vales':len(state['vales']),
+                    'num_discard':len(state['discard'])
+                   })
 @app.route("/action")
 def action():
     if request.args.get('action') == 'push':
         return jsonify(gamer.play_on_deck(session['id']))
     elif request.args.get('action') == 'flip':
-        return jsonify(gamer.flip(session['id']))
+        data = gamer.flip(session['id'])
+        if not data['shuffled']:
+            return jsonify(data)
     elif request.args.get('action') == 'end_turn':
         return jsonify(gamer.end_turn(session['id']))
     elif request.args.get('action') == 'flip_token':
@@ -116,9 +130,9 @@ def action():
     elif request.args.get('action') == 'sub_bank':
         return jsonify(gamer.add_points(-1))
     elif request.args.get('action') == 'shuffle':
-        return jsonify(gamer.shuffle(session['id']))
+        gamer.shuffle(session['id'])
     elif request.args.get('action') == 'discard_vale':
-        return jsonify(gamer.discard_vale(session['id'],request.args.get('vale'),request.args.get('source')))
+        gamer.discard_vale(session['id'],request.args.get('vale'),request.args.get('source'))
     elif request.args.get('action') == 'set_color':
         return jsonify(gamer.set_color(session['id'], request.args.get('color')))
     elif request.args.get('action') == 'set_leaders':
@@ -128,9 +142,22 @@ def action():
     elif request.args.get('action') == 'flip_leader':
         return jsonify(gamer.flip_leader(session['id']))
     elif request.args.get('action') == 'discard_field':
-        return jsonify(gamer.discard_field(session['id']))
+        gamer.discard_field(session['id'])
     elif request.args.get('action') == 'undo':
-         return jsonify(gamer.restore_state(session['id'],int(request.args.get('number'))))
+         gamer.restore_state(session['id'],int(request.args.get('number')))
+    else:
+        raise Exception('Invalid Action')
+
+    state = gamer.get_state(session['id'])
+    return jsonify({'full_html':render_template('game.html', state=state),
+                    'deck-display':render_template('deck.html', state=state),
+                    'discard':render_template('discard.html', state=state),
+                    'field':render_template('own_field.html', state=state),
+                    'vales':render_template('own_vales.html', state=state),
+                    'purgatory':render_template('purgatory.html', state=state),
+                    'num_vales':len(state['vales']),
+                    'num_discard':len(state['discard'])
+                   })
 
 
 @app.route('/update')
@@ -141,32 +168,41 @@ def update():
 
     # no change
     if session['known_players_turn'] == players_turn and session['known_turn_statuses'][requested_player] == turn_status:
-        return jsonify({'new_turn':None,'all_players_field':None,'requested_field':None,'reload':False})
+        return jsonify({'your_turn':None,'full_html':None,'requested_field':None,'turn_name':None})
 
-    # current players turn
+    # now it's current player's turn
     if session['known_players_turn'] != players_turn and players_turn == session['id']:
-        session['known_players_turn'] = players_turn
-        return jsonify({'new_turn':None,'all_players_field':None,'requested_field':None,'reload':True})
+        reload_update_known()
+        return jsonify({'full_html':render_template('game.html', state=gamer.get_state(session['id'])),
+                        'your_turn':True,'requested_field':None, 'turn_name':None})
 
-    # new players turn, update all
+    # new player's turn, update all
     if session['known_players_turn'] != players_turn:
-        session['known_players_turn'] = players_turn
-        session['known_turn_statuses'] = gamer.get_turn_statuses()
+        reload_update_known()
 
         # get field data
-        return jsonify({'new_turn':gamer.get_state(session['id'])['players_turn']['name'],
-                        'all_players_field':None,'requested_field':None,'reload':False})
+        state=gamer.get_state(session['id'])
+        turn_name = state['players_turn']['name']
+        return jsonify({'full_html':render_template('game.html', state=state),
+                        'your_turn':False,'requested_field':None,'turn_name':turn_name})
 
     # just one player to update
     player = gamer.get_other_state(requested_player)
     known_turn_statuses = session['known_turn_statuses']
     known_turn_statuses.update({requested_player:turn_status})
     session['known_turn_statuses'] = known_turn_statuses
-    return jsonify({'requested_field':render_template('field.html',player=player,replace_all=False),
-                    'turn_field':None,'all_players_field':None,'reload':False})
+    state = gamer.get_state(session['id'])
+    return jsonify({'requested_field':render_template('field.html',player=player),
+                    'advancements':render_template('advancements.html',state=state),
+                    'vales-available':render_template('vales.html',state=state),
+                    'turn_field':None,'full_html':None,'reload':False})
 
 @app.route("/debug",methods=["GET","POST"])
 def debug():
     if request.method == 'POST':
         exec(request.form.get("exec"))
     return render_template('debug.html')
+
+def reload_update_known():
+    session['known_turn_statuses'] = gamer.get_turn_statuses()
+    session['known_players_turn'] = gamer.get_players_turn()

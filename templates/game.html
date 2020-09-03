@@ -28,168 +28,28 @@
 
 <button class="accordion active">Your Field</button>
 <div class="panel" id="field" style="display:block">
-  <div style="text-align:center;margin-top:1%;position:relative">
-    <div style="float:left">
-        <div id="score">Your score: {{state['score']}}</div>
-        <button type="button" onclick="scorePoints()">+</button>
-        <button type="button" onclick="losePoints()">-</button>
-        <div id="points-left">Points left: {{state['points_left']}}</div>
-        <button type="button" onclick="addBankPoints()">+</button>
-        <button type="button" onclick="subBankPoints()">-</button>
-        <div style="margin-bottom:10px"><button type="button" id="End Turn" onclick="endTurn()">End Turn</button></div>
-    </div>
-    <div class="circle" id="token" onclick="flipToken()" style="background-color:{{ 'blue' if state['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not state['is_first']}}">
-      {% if state['is_first'] %}
-        <img id="token-star" src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if state['flipped'] else 'block'}}">
-      {% endif %}
-    </div>
-    <div style="float:right">
-      <button type="button" id="shuffle" onclick="shuffle()">Shuffle Deck</button>
-      <br>
-      <button type="button" id="add-to-deck" disabled onclick="addToDeck()">Move card to top of deck</button>
-      <br>
-      <button type="button" id="add-to-deck-bottom" disabled onclick="addToDeckBottom()">Move card to bottom of deck</button>
-      <br>
-      <button type="button" id="discard-card" disabled onclick="discardCard()">Discard card</button>
-      <br>
-      <button type="button" id="deselect" disabled onclick="deselectSelection(false)">Deselect</button>
-      {% if state['using_leaders'] %}
-        <br>
-        <button type="button" id="flip-leader" disabled onclick="flipLeader()">Flip leader</button>
-      {% endif %}
-    </div>
-  </div>
-  <br>
-  <span class="card on-deck">
-    {% set card = state['on_deck'] %}
-        {% if not card and state['deck_left'] > 0 %}
-          <div class="cardAdv">
-            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{state['color']}}_background.png" class="advancement">
-          </div>
-        {% elif not card %}
-          <div class="cardAdv">
-            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-          </div>
-        {% else %}
-          <div class="cardAdv card-background">
-            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-          </div>
-        {% endif %}
-        {% if card %}
-          {% for advancement in card.listify_advs() %}
-            <div class="cardAdv" id="{{advancement }}">
-              <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
-            </div>
-          {% endfor %}
-        {% endif %}
-        {% if card %}
-          <div class="card-select"><button type="button" onclick="pushCard()" id="{{card.id}}">Push ({{state['deck_left']}} Left)</button></div>
-        {% elif state['deck_left'] > 0 %}
-          <div class="card-select"><button type="button" onclick="flipCard()" id="{{flip}}">Flip ({{state['deck_left']}} Left)</button></div>
-        {% else %}
-          <div class="card-select"><button type="button" onclick="flipCard()" id="{{flip}}">Shuffle and Flip</button></div>
-        {% endif %}
-    </span>
-
-    {% for card in state['field'].values() %}
-    <span class="card">
-      <div class="cardAdv card-background">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-      </div>
-      {% for advancement in card.listify_advs() %}
-      <div class="cardAdv" id="{{advancement }}">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement" onclick="selCardAdv('{{card.id}}','field')">
-      </div>
-      {% endfor %}
-      <div class="card-select"><button type="button" id="{{card.id}}" onclick="selectCard('{{card.id}}','field')">^Select Card</button></div>
-    </span>
-    {% endfor %}
-  <br>
+  {% include 'own_field.html' %}
 </div>
 
 <button class="accordion active">Vales Owned ({{state['vales']|length}} vale{{'s' if state['vales']|length != 1}})</button>
 <div class="panel" id="vales-owned" style="display:block">
-  <div style="width:100%">
-    <button type="button" id="discard-vale" disabled onclick="discardVale()">Discard vale</button>
-    <br>
-    <button type="button" id="move-to-vales" disabled onclick="moveToVales()">Move to your vales</button>
-    <br>
-    {% for vale in state['vales'] %}
-      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%" id ="{{ vale}}" onclick="selectVale('{{vale}}','vales')">
-    {% endfor %}
-  </div>
-  <br>
+  {% include 'own_vales.html' %}
 </div>
 
 <button class="accordion">Your Discard ({{state['discard']|length}} card{{'s' if state['discard']|length != 1}})</button>
 <div class="panel" id="discard">
-  <br>
-  <button type="button" onclick="discardField()">Discard field</button>
-  <br>
-    {% for card in state['discard'] %}
-    <span class="card">
-      <div class="cardAdv card-background">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-      </div>
-      {% for advancement in card.listify_advs() %}
-      <div class="cardAdv" id="{{advancement }}">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
-      </div>
-      {% endfor %}
-      <div class="card-select"><button type="button" id="{{card.id}}" onclick="selectCard('{{card.id}}','discard')">^Select Card</button></div>
-    </span>
-    {% endfor %}
-  <br>
+  {% include 'discard.html' %}
 </div>
 
 <button class="accordion">Purgatory</button>
 <div class="panel" id="purgatory">
-  <br>
-  <button type="button" id="move-to-purgatory" onclick="moveToPurgatory()" disabled>Move to Purgatory</button>
-  <br>
-    {% for card in state['purgatory']['cards'].values() %}
-    <span class="card">
-      <div class="cardAdv card-background">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-      </div>
-      {% for advancement in card.listify_advs() %}
-      <div class="cardAdv" id="{{advancement }}">
-        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
-      </div>
-      {% endfor %}
-      <div class="card-select"><button type="button" id="{{card.id}}" onclick="selectCard('{{card.id}}','purgatory')">^Select Card</button></div>
-    </span>
-    {% endfor %}
-
-    <div style="float:left;width:100%" id="others">
-    {% for other in state['purgatory']['others'] %}
-      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{other[0:([6,other|length]|min)]}}.png" class="vale" style="width:15%" id ="{{ other }}" onclick="{{'selectVale(' if other[0] == 'v' else 'selectAdv('}}'{{other}}','purgatory')">
-    {% endfor %}
-  </div>
-  <br>
+  {% include 'purgatory.html' %}
 </div>
 
 <div id="deck" style="display:none">
-  <button class="accordion">Your Deck</button>
-  <div class="panel">
-    <br>
-    <button type="button" id="discard-card-deck" disabled onclick="discardCard()">Discard card</button>
-    <br>
-    <br>
-      {% for card in state['deck'] %}
-      <span class="card">
-        <div class="cardAdv card-background">
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
-        </div>
-        {% for advancement in card.listify_advs() %}
-        <div class="cardAdv" id = {{advancement}}>
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
-        </div>
-        {% endfor %}
-        <div class="card-select"><button type="button" id="{{card.id}}" onclick="selectCard('{{card.id}}','deck')">^Select Card</button></div>
-      </span>
-      {% endfor %}
-    <br>
+  <button class="accordion active">Your Deck</button>
+  <div class="panel" style="display:block" id="deck-display">
+    {% include 'deck.html' %}
   </div>
 </div>
 </div>

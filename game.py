@@ -117,14 +117,17 @@ class Player:
         self.turn_status += 1
         self.save_state()
 
-        # if dont already have on deck card (no glitch in html), draw
+        # if dont already have on deck card (no glitch in html)
         if not self.on_deck:
+            # if deck is empty, shuffle deck instead of flipping
             if not self.deck:
                 self.deck = self.discard
                 random.shuffle(self.deck)
                 self.discard = []
+                return {'shuffled':True}
+            # otherwise, flip
             self.on_deck = self.deck.pop()
-        return {'card':self.on_deck.dictify(), 'remaining':len(self.deck)}
+        return {'card':self.on_deck.dictify(), 'remaining':len(self.deck),'shuffled':False}
 
     def shuffle(self):
         # update turn status
@@ -330,8 +333,6 @@ class Game:
 
     # move items places
     def move(self,item,source,destination,player,source_card=None):
-        return_value = (None, item)
-
         # buying advancement
         if source == 'adv_deck' and destination[0] == 'c':
             return self.add_advancement(player,destination,item)
@@ -393,9 +394,6 @@ class Game:
         else:
             destination[item] = item
             source.remove(item)
-
-        # return next advancement, if necessary
-        return return_value
 
     def add_points(self,points):
         self.points_left += int(points)
@@ -475,7 +473,7 @@ class Game:
         if vale[1] == 'a':
             self.vale_ones[self.vale_ones.index(vale)] = None
         else:
-            self.vale_twos[self.vale_ones.index(vale)] = None
+            self.vale_twos[self.vale_twos.index(vale)] = None
 
     def end_turn(self,player):
         # save state

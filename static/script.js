@@ -135,13 +135,15 @@ function flipCard() {
         // move card from (hidden) deck
         var on_deck = $('#field').find('.on-deck');
         new_on_deck = $('#deck .panel').find('.card').last();
-        if (!new_on_deck.length) {
-            return window.location.replace('/play');
+
+        // just shuffled
+        if (data.full_html) {
+            replaceHTML(data);
+            return;
         }
         on_deck.before(new_on_deck);
 
         on_deck.remove();
-
         // update card
         var id = new_on_deck.find('button').attr('id');
         new_on_deck.find('img').attr('onclick',`"selCardAdv('${id}','field')"`);
@@ -171,8 +173,8 @@ function selectVale(vale, location) {
 }
 
 function moveToPurgatory() {
-        $.get('/move', {'source':source,'item':selection,'destination':'purgatory','source_card':source_card}, function() {
-        window.location.replace('/play');
+        $.get('/move', {'source':source,'item':selection,'destination':'purgatory','source_card':source_card}, function(data) {
+        replaceHTML(data);
     });
 }
 
@@ -272,32 +274,30 @@ function toggleDeck() {
 }
 
 function endTurn() {
-    $.get('/action', {'action':'end_turn'}, function() {
-        window.location.replace('/play');
-    });
+    $.get('/action', {'action':'end_turn'}, function() {});
 }
 
 function discardCard() {
-    $.get('/move', {'source':source,'item':selection,'destination':'discard','source_card':null}, function() {
-        window.location.replace('/play');
+    $.get('/move', {'source':source,'item':selection,'destination':'discard','source_card':null}, function(data) {
+        replaceHTML(data, ['deck-display','field','purgatory','discard']);
     });
 }
 
 function discardVale() {
-    $.get('/action', {'action':'discard_vale','vale':selection, 'source':source},function() {
-            window.location.replace('/play');
+    $.get('/action', {'action':'discard_vale','vale':selection, 'source':source},function(data) {
+            replaceHTML(data, ['vales-owned']);
         });
 }
 
 function addToDeck() {
-    $.get('/move', {'source':source,'item':selection,'destination':'deck','source_card':null}, function() {
-        window.location.replace('/play');
+    $.get('/move', {'source':source,'item':selection,'destination':'deck','source_card':null}, function(data) {
+        replaceHTML(data, ['deck-display','field','purgatory','discard']);
     });
 }
 
 function addToDeckBottom() {
-    $.get('/move', {'source':source,'item':selection,'destination':'deck_bottom','source_card':null}, function() {
-        window.location.replace('/play');
+    $.get('/move', {'source':source,'item':selection,'destination':'deck_bottom','source_card':null}, function(data) {
+        replaceHTML(data, ['deck-display','field','purgatory','discard']);
     });
 }
 
@@ -345,14 +345,14 @@ function buyVale(id) {
 
 function shuffle() {
     // shuffle deck
-    $.get('/action', {'action':'shuffle'}, function() {
-        window.location.replace('/play');
+    $.get('/action', {'action':'shuffle'}, function(data) {
+        replaceHTML(data, ['deck-display','discard','field']);
     });
 }
 
 function undo() {
-    $.get('/action', {'action':'undo','number':$('#undo-number').val()}, function() {
-        window.location.replace('/play');
+    $.get('/action', {'action':'undo','number':$('#undo-number').val()}, function(data) {
+        replaceHTML(data);
     });
 }
 
@@ -421,9 +421,25 @@ function setLeader(leader) {
 }
 
 function discardField() {
-    $.get('/action',{'action':'discard_field'}, function() {
-        window.location.replace('/play');
+    $.get('/action',{'action':'discard_field'}, function(data) {
+        replaceHTML(data, ['field','discard']);
     });
+}
+
+function replaceHTML(data,places=null) {
+    deselectSelection();
+    if (!places) {
+        document.open("text/html", "replace");
+        document.write(data['full_html']);
+        document.close();
+    }
+    else {
+        for (var place of places) {
+            $('#'+place).html(data[place]);
+        }
+        $('#vales-owned').prev().html(`Vales Owned (${data['num_vales']} vale${data['num_vales'] != 1 ? 's':''})`);
+        $('#discard').prev().html(`Your Discard (${data['num_discard']} card${data['num_discard'] != 1 ? 's':''})`);
+    }
 }
 
 function check_server() {
@@ -434,24 +450,25 @@ function check_server() {
              type: 'GET',
              data : {'player':player},
              success: function(data) {
-                // current player's turn
-                if (data.reload) {
-                  if (window.confirm("It's your turn! Click ok to reload the page.")) {
-                    window.location.replace('/play');
-                  }
+                // new player's turn
+                if (data.full_html) {
+                  replaceHTML(data);
                 }
 
-                // need to update everyone's fields
-                else if (data.new_turn) {
-                  if (window.confirm(`It's now ${data.new_turn}'s turn! Click ok to reload`)) {
-                    window.location.replace('/play');
-                  }
+                // let user know if it's newly someone's turn
+                if (data.turn_name) {
+                    window.alert(`It's ${data.turn_name}'s turn!`);
+                }
+
+                else if (data.your_turn) {
+                    window.alert(`It's your turn!`);
                 }
 
                 // need to update one player's field
                 else if (data.requested_field) {
                   hidden = $(`#player${player}`).is(':hidden');
                   $(`#player${player}`).html(data.requested_field);
+                  replaceHTML(data,['advancements','vales-available'])
                   if (!hidden) {
                     $(`#player${player}`).display = 'block';
                     $(`#player${player}`).prev().removeClass('active');
