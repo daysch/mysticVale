@@ -32,7 +32,7 @@ margin:3px;
 }
 
 .vale {
-    width: 22%;
+    width: 20%;
     padding-left: 1%;
     padding-right:1%;
     padding-top: 2%;
@@ -154,12 +154,6 @@ button {
   display: block;
   height:75%;
   max-width: 700px;
-}
-
-/* Add Animation - Zoom in the Modal */
-.modal-content, #caption {
-  animation-name: zoom;
-  animation-duration: 0.6s;
 }
 
 @keyframes zoom {

@@ -4,6 +4,7 @@ from tempfile import mkdtemp
 import time
 import game
 from helpers import apology, jinja_debug
+from pympler import asizeof
 
 
 # Configure application
@@ -127,6 +128,8 @@ def action():
         return jsonify(gamer.flip_leader(session['id']))
     elif request.args.get('action') == 'discard_field':
         return jsonify(gamer.discard_field(session['id']))
+    elif request.args.get('action') == 'undo':
+         return jsonify(gamer.restore_state(session['id'],int(request.args.get('number'))))
 
 
 @app.route('/update')
@@ -137,12 +140,12 @@ def update():
 
     # no change
     if session['known_players_turn'] == players_turn and session['known_turn_statuses'][requested_player] == turn_status:
-        return jsonify({'turn_field':None,'all_players_field':None,'requested_field':None,'reload':False})
+        return jsonify({'new_turn':None,'all_players_field':None,'requested_field':None,'reload':False})
 
     # current players turn
     if session['known_players_turn'] != players_turn and players_turn == session['id']:
         session['known_players_turn'] = players_turn
-        return jsonify({'turn_field':None,'all_players_field':None,'requested_field':None,'reload':True})
+        return jsonify({'new_turn':None,'all_players_field':None,'requested_field':None,'reload':True})
 
     # new players turn, update all
     if session['known_players_turn'] != players_turn:
@@ -150,11 +153,8 @@ def update():
         session['known_turn_statuses'] = gamer.get_turn_statuses()
 
         # get field data
-        state = gamer.get_state(session['id'])
-        return jsonify({'turn_field':render_template('field.html',player=state['players_turn'],replace_all=True),
-                       'all_players_field':''.join([render_template('field.html',player=player,replace_all=True)
-                                                     for player in state['other_players']])
-                        })
+        return jsonify({'new_turn':gamer.get_state(session['id'])['players_turn']['name'],
+                        'all_players_field':None,'requested_field':None,'reload':False})
 
     # just one player to update
     player = gamer.get_other_state(requested_player)

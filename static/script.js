@@ -336,21 +336,22 @@ function selectAdv(id,location) {
 // Buy selected vale card
 function buyVale(id) {
     $.get('/buy', {'valeID': id}, function(vale) {
-        if (vale) {
-            $('#'+id).attr('src','https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png');
-            $('#'+id).removeAttr('onclick');
-            $('#'+id).removeAttr('id');
-            $('#player').find('#vales-owned div').append('<img src="https://flaskdixit.files.wordpress.com/2020/08/'+id+'.png" class="vale" style="width:15%" id ="'+id+'" onclick="selectVale(\''+id+'\',\'vales\')">');
-        }
-        else {
-            alert("Unable to buy vale. That's all I know.");
-        }
+        $('#'+id).attr('src','https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png');
+        $('#'+id).removeAttr('onclick');
+        $('#'+id).removeAttr('id');
+        $('#player').find('#vales-owned div').append('<img src="https://flaskdixit.files.wordpress.com/2020/08/'+id+'.png" class="vale" style="width:15%" id ="'+id+'" onclick="selectVale(\''+id+'\',\'vales\')">');
     });
 }
 
 function shuffle() {
     // shuffle deck
     $.get('/action', {'action':'shuffle'}, function() {
+        window.location.replace('/play');
+    });
+}
+
+function undo() {
+    $.get('/action', {'action':'undo','number':$('#undo-number').val()}, function() {
         window.location.replace('/play');
     });
 }
@@ -435,15 +436,16 @@ function check_server() {
              success: function(data) {
                 // current player's turn
                 if (data.reload) {
-                  if (window.confirm("It's your turn! Click okay to reload the page.")) {
+                  if (window.confirm("It's your turn! Click ok to reload the page.")) {
                     window.location.replace('/play');
                   }
                 }
 
                 // need to update everyone's fields
-                else if (data.turn_field) {
-                  $('#players-turn').html(data.turn_field)
-                  $('#other-players').html(data.all_players_field)
+                else if (data.new_turn) {
+                  if (window.confirm(`It's now ${data.new_turn}'s turn! Click ok to reload`)) {
+                    window.location.replace('/play');
+                  }
                 }
 
                 // need to update one player's field

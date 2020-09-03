@@ -11,6 +11,7 @@
     <button class="accordion active">{{player['name']}}'s Field</button>
     <div class="panel" id="player{{player['id']}}" style="display:block">
         <div>{{player['name']}}'s score: {{player['score']}}</div>
+        <div>{{player['deck_left']}} cards left in deck</div>
         <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
           {% if player['is_first'] %}
             <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
@@ -70,14 +71,22 @@
 <div id='player'>
 <button class="accordion">Vale Cards</button>
 <div class="panel" id="vales-available">
-  <div style="float:left;width:25%;background:#C0C0C0">
+  <div style="float:left;width:30%;background:#C0C0C0;text-align:center">
     {% for vale1 in state['vale_ones'] %}
-      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale1}}.png" class="vale" id ="{{vale1}}" onclick="buyVale('{{vale1}}')">
+      {% if vale1 %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale1}}.png" class="vale" id ="{{vale1}}" onclick="buyVale('{{vale1}}')">
+      {% else %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="vale">
+      {% endif %}
     {% endfor %}
   </div>
-  <div style="float:left;width:25%;background:#999966">
+  <div style="float:left;width:30%;background:#999966;text-align:center">
     {% for vale2 in state['vale_twos'] %}
-      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale2}}.png" class="vale" id ="{{vale2}}" onclick="buyVale('{{vale2}}')">
+      {% if vale2 %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale2}}.png" class="vale" id ="{{vale2}}" onclick="buyVale('{{vale2}}')">
+      {% else %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="vale">
+      {% endif %}
     {% endfor %}
   </div>
 </div>
@@ -87,19 +96,31 @@
   <div class="col-container">
     <div class="col" style="background:#DCDCDC">
         {% for adv1 in state['adv_ones'] %}
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv1}}.png" class="buyable-adv" id="{{adv1}}" onclick="selectAdv('{{adv1}}','adv_deck')">
+          {% if adv1 %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv1}}.png" class="buyable-adv" id="{{adv1}}" onclick="selectAdv('{{adv1}}','adv_deck')">
+          {% else %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="buyable-adv">
+           {% endif %}
         {% endfor %}
         <br>
         <div style="text-align:center">{{state['adv_ones_left']}} level ones left</div>
     </div>
     <div class="col" style="background:#F8F8F8">
         {% for adv2 in state['adv_twos'] %}
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv2}}.png" class="buyable-adv" id="{{adv2}}" onclick="selectAdv('{{adv2}}','adv_deck')">
+          {% if adv2 %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv2}}.png" class="buyable-adv" id="{{adv2}}" onclick="selectAdv('{{adv2}}','adv_deck')">
+          {% else %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="buyable-adv">
+          {% endif %}
         {% endfor %}
     </div>
     <div class="col" style="background:#DCDCDC">
         {% for adv3 in state['adv_threes'] %}
-          <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv3}}.png" class="buyable-adv" id="{{adv3}}" onclick="selectAdv('{{adv3}}','adv_deck')">
+          {% if adv3 %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv3}}.png" class="buyable-adv" id="{{adv3}}" onclick="selectAdv('{{adv3}}','adv_deck')">
+          {% else %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="buyable-adv">
+          {% endif %}
         {% endfor %}
     </div>
     <div class="col" style="background:#F8F8F8">
@@ -292,6 +313,7 @@
   <button class="accordion">{{player['name']}}'s Field</button>
   <div class="panel" id="player{{player['id']}}">
       <div>{{player['name']}}'s score: {{player['score']}}</div>
+      <div>{{player['deck_left']}} cards left in deck</div>
       <div class="circle" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
         {% if player['is_first'] %}
           <img src="https://flaskdixit.files.wordpress.com/2020/08/star.png" style="width:100%;display:{{'none' if player['flipped'] else 'block'}}">
@@ -348,6 +370,9 @@
 
 <br>
 <button type="button" id="toggle-deck" onclick="toggleDeck()">Show Your Deck</button>
+<br>
+<button type="button" onclick="undo()">Undo:</button>
+<input autocomplete="off" id="undo-number" value="1" type="number" style="width:30px"/>
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
