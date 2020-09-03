@@ -3,7 +3,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 import time
 import game
-from helpers import apology, jinja_debug
+from helpers import apology, jinja_debug, render_field
 from pympler import asizeof
 
 
@@ -12,6 +12,7 @@ app = Flask(__name__)
 gamer = game.Game()
 app.config['SECRET_KEY'] = "Your_secret_string"
 app.jinja_env.filters["debug"] = jinja_debug
+app.jinja_env.filters["render_field"] = render_field
 
 @app.route("/",methods=["GET","POST"])
 def index():

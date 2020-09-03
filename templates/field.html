@@ -1,8 +1,3 @@
-{% if replace_all %}
-  <button class="accordion active">{{player['name']}}'s Field</button>
-  <div class="panel" id="player{{player['id']}}" style="display:block">
-{% endif %}
-
 <div>{{player['name']}}'s score: {{player['score']}}</div>
 <div>{{player['deck_left']}} cards left in deck</div>
   <div class="circle" onclick="flipToken()" style="background-color:{{ 'blue' if player['flipped'] else 'gray;padding-top:0%' }}{{';padding-top:5%' if not player['is_first']}}">
@@ -54,7 +49,3 @@
     <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%">
   {% endfor %}
 </div>
-{% if replacing_all %}
-  </div>
-{% endif %}
-<br>

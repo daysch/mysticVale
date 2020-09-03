@@ -23,3 +23,7 @@ def jinja_debug(text):
     print()
     print()
     return ''
+
+def render_field(player):
+    print(render_template('field.html',player=player))
+    return render_template('field.html',player=player)
