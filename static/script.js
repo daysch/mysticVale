@@ -2,7 +2,7 @@
 function setup() {
     createAccordion();
     setup_modal();
-    window.setInterval(check_server, 1000);
+    window.setInterval(check_server, 3000);
 }
 
 function setup_modal() {
@@ -226,6 +226,9 @@ function endTurn() {
 function discardCard() {
     $.get('/move', {'source':source,'item':selection,'destination':'discard','source_card':null}, function(data) {
         replaceHTML(data, ['deck-display','field','purgatory','discard']);
+        if ($('#deck').is(':visible')) {
+            toggleDeck();
+        }
     });
 }
 
@@ -378,13 +381,17 @@ function replaceHTML(data,places=null) {
         document.open("text/html", "replace");
         document.write(data['full_html']);
         document.close();
+        setup_modal();
     }
     else {
         for (var place of places) {
-            $('#'+place).html(data[place]);
+            if (data[place]) {
+                $('#'+place).html(data[place]);
+            }
         }
         $('#vales-owned').prev().html(`Vales Owned (${data['num_vales']} vale${data['num_vales'] != 1 ? 's':''})`);
         $('#discard').prev().html(`Your Discard (${data['num_discard']} card${data['num_discard'] != 1 ? 's':''})`);
+        setup_modal();
     }
 }
 
@@ -414,7 +421,7 @@ function check_server() {
                 else if (data.requested_field) {
                   hidden = $(`#player${player}`).is(':hidden');
                   $(`#player${player}`).html(data.requested_field);
-                  replaceHTML(data,['advancements','vales-available'])
+                  replaceHTML(data,['advancements','vales-available']);
                   if (!hidden) {
                     $(`#player${player}`).display = 'block';
                     $(`#player${player}`).prev().removeClass('active');

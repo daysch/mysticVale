@@ -104,7 +104,7 @@ def move():
                     'deck-display':render_template('deck.html', state=state),
                     'discard':render_template('discard.html', state=state),
                     'field':render_template('own_field.html', state=state),
-                    'vales':render_template('own_vales.html', state=state),
+                    'vales-owned':render_template('own_vales.html', state=state),
                     'purgatory':render_template('purgatory.html', state=state),
                     'num_vales':len(state['vales']),
                     'num_discard':len(state['discard'])
@@ -151,7 +151,7 @@ def action():
                     'deck-display':render_template('deck.html', state=state),
                     'discard':render_template('discard.html', state=state),
                     'field':render_template('own_field.html', state=state),
-                    'vales':render_template('own_vales.html', state=state),
+                    'vales-owned':render_template('own_vales.html', state=state),
                     'purgatory':render_template('purgatory.html', state=state),
                     'num_vales':len(state['vales']),
                     'num_discard':len(state['discard'])
