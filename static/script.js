@@ -273,7 +273,7 @@ function createAccordion() {
 
 // Select Advancement
 function selectAdv(id,location) {
-    deselectSelection();
+    deselectSelection(false);
     source = location;
     selection = id;
     $('#player').find('#'+id).css('background','#ebebe0');
@@ -284,11 +284,12 @@ function selectAdv(id,location) {
 
 // Buy selected vale card
 function buyVale(id) {
-    $.get('/buy', {'valeID': id}, function(vale) {
+    $.get('/buy', {'valeID': id}, function(num_vales) {
         $('#'+id).attr('src','https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png');
         $('#'+id).removeAttr('onclick');
         $('#'+id).removeAttr('id');
         $('#player').find('#vales-owned div').append('<img src="https://flaskdixit.files.wordpress.com/2020/08/'+id+'.png" class="vale" style="width:15%" id ="'+id+'" onclick="selectVale(\''+id+'\',\'vales\')">');
+        $('#vales-owned').prev().html(`Vales Owned (${num_vales} vale${num_vales != 1 ? 's':''})`);
     });
 }
 
@@ -359,7 +360,7 @@ function flipLeader() {
         $('#'+selection).children('img').attr('src',`https://flaskdixit.files.wordpress.com/2020/08/${leader}.png`);
         $('#'+selection).attr('id',leader);
         selection = leader
-        deselectSelection();
+        deselectSelection(false);
     });
 }
 
@@ -376,7 +377,6 @@ function discardField() {
 }
 
 function replaceHTML(data,places=null) {
-    deselectSelection();
     if (!places) {
         document.open("text/html", "replace");
         document.write(data['full_html']);
@@ -385,12 +385,20 @@ function replaceHTML(data,places=null) {
     }
     else {
         for (var place of places) {
+            console.log(place)
             if (data[place]) {
+                if (data[place] == 'advancements' && source == 'adv_deck') {
+                    deselectSelection(false);
+                }
+                else if (place == 'vales-owned') {
+                    $('#vales-owned').prev().html(`Vales Owned (${data['num_vales']} vale${data['num_vales'] != 1 ? 's':''})`);
+                }
+                else if (place == 'discard') {
+                    $('#discard').prev().html(`Your Discard (${data['num_discard']} card${data['num_discard'] != 1 ? 's':''})`);
+                }
                 $('#'+place).html(data[place]);
             }
         }
-        $('#vales-owned').prev().html(`Vales Owned (${data['num_vales']} vale${data['num_vales'] != 1 ? 's':''})`);
-        $('#discard').prev().html(`Your Discard (${data['num_discard']} card${data['num_discard'] != 1 ? 's':''})`);
         setup_modal();
     }
 }
@@ -427,7 +435,7 @@ function check_server() {
                     $(`#player${player}`).prev().removeClass('active');
                   }
                   else {
-                     $(`#player${player}`).display = 'none';
+                    $(`#player${player}`).display = 'none';
                     $(`#player${player}`).prev().addClass('active');
                   }
                 }

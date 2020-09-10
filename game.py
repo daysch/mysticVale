@@ -169,6 +169,8 @@ class Player:
         # update turn status
         self.turn_status += 1
 
+        return len(self.vales)
+
     def add_advancement(self,card,advancement):
         self.field[card].add(advancement)
 
@@ -239,7 +241,7 @@ class Player:
     def save_state(self):
         state = {'deck':copy.deepcopy(self.deck),'field':copy.deepcopy(self.field),'discard':copy.deepcopy(self.discard),
                  'on_deck':copy.deepcopy(self.on_deck),'vales':copy.deepcopy(self.vales),'points':self.points,
-                 'game_state':self.game_state}
+                 'game_state':self.game_state, 'turn_status':self.turn_status}
         self.history.append(state)
 
     def restore_state(self, delta_state):
@@ -258,6 +260,7 @@ class Player:
         self.game_state = state['game_state']
         delta_points = self.points - state['points']
         self.points = state['points']
+        self.turn_status = state['turn_status']
 
         # update turn status
         self.turn_status += 1
@@ -288,6 +291,8 @@ class Game:
         self.in_progress = False
         self.using_leaders = False
         self.history = []
+        self.vale_state = 0
+        self.adv_state = 0
 
         self.adv_ones = []
         self.adv_twos = []
@@ -325,6 +330,8 @@ class Game:
         for player in self.players.values():
             player.new_game()
 
+        self.vale_state = 0
+        self.adv_state = 0
         self.players_turn = random.choice(list(self.players.keys()))
         self.players[self.players_turn].is_first = True
         self.in_progress = True
@@ -422,6 +429,8 @@ class Game:
                 'random_deck':list(np.random.permutation(self.players[id].deck)),
                 'adv_ones_left':len(self.adv_ones) - 3,
                 'using_leaders':self.using_leaders,
+                'vale_state':self.vale_state,
+                'adv_state':self.adv_state,
                 'player_ids': [player for player in self.players if player != id],
                 'players_turn':None if pt.id == id else self.get_other_state(pt.id),
                 'other_players': [self.get_other_state(player) for player in self.players if player != id and player != self.players_turn]}
@@ -439,6 +448,7 @@ class Game:
         # save state
         self.players[player].save_state()
         self.save_state()
+        self.adv_state += 1
 
         # initiate return value
         remainder = None
@@ -465,15 +475,18 @@ class Game:
         # save state
         self.players[player].save_state()
         self.save_state()
+        self.vale_state += 1
 
         # give vale card to player
-        self.players[player].add_vale(vale)
+        vales_owned = self.players[player].add_vale(vale)
 
         # remove vale from deck
         if vale[1] == 'a':
             self.vale_ones[self.vale_ones.index(vale)] = None
         else:
             self.vale_twos[self.vale_twos.index(vale)] = None
+
+        return vales_owned
 
     def end_turn(self,player):
         # save state
@@ -534,6 +547,12 @@ class Game:
 
     def get_turn_status(self,id):
         return self.players[int(id)].turn_status
+
+    def get_vale_state(self):
+        return self.vale_state
+
+    def get_adv_state(self):
+        return self.adv_state
 
     def get_players_turn(self):
         return self.players_turn

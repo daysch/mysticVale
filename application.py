@@ -73,8 +73,7 @@ def play():
         (leaders, opposites) = gamer.leader_options(session['id'])
         return render_template('leaders.html',leaders=leaders,opposites=opposites)
 
-    session['known_turn_statuses'] = gamer.get_turn_statuses()
-    session['known_players_turn'] = gamer.get_players_turn()
+    reload_update_known()
     return render_template('game.html', state=gamer.get_state(session['id']))
 
 @app.route("/waiting")
@@ -184,16 +183,31 @@ def update():
         return jsonify({'full_html':render_template('game.html', state=state),
                         'your_turn':False,'requested_field':None,'turn_name':turn_name})
 
-    # just one player to update
+    ## just one player to update
+    # player has hit undo, so we need to update the whole field
+    elif session['known_turn_statuses'][requested_player] > turn_status:
+        reload_update_known()
+
+        # get field data
+        state=gamer.get_state(session['id'])
+        return jsonify({'full_html':render_template('game.html', state=state),
+                        'your_turn':False,'requested_field':None,'turn_name':None})
+
+    # update known information
     player = gamer.get_other_state(requested_player)
     known_turn_statuses = session['known_turn_statuses']
     known_turn_statuses.update({requested_player:turn_status})
     session['known_turn_statuses'] = known_turn_statuses
     state = gamer.get_state(session['id'])
-    return jsonify({'requested_field':render_template('field.html',player=player),
-                    'advancements':render_template('advancements.html',state=state),
-                    'vales-available':render_template('vales.html',state=state),
-                    'turn_field':None,'full_html':None,'reload':False})
+
+    # prepare return value
+    rv = jsonify({'requested_field':render_template('field.html',player=player),
+                  'advancements':render_template('advancements.html',state=state) if session['known_adv_state'] != state['adv_state'] else None,
+                  'vales-available':render_template('vales.html',state=state) if session['known_vale_state'] != state['vale_state'] else None,
+                  'turn_field':None,'full_html':None,'reload':False})
+    session['known_adv_state'] = state['adv_state']
+    session['known_vale_state'] = state['vale_state']
+    return rv
 
 @app.route("/debug",methods=["GET","POST"])
 def debug():
@@ -204,3 +218,5 @@ def debug():
 def reload_update_known():
     session['known_turn_statuses'] = gamer.get_turn_statuses()
     session['known_players_turn'] = gamer.get_players_turn()
+    session['known_adv_state'] = gamer.get_adv_state()
+    session['known_vale_state'] = gamer.get_vale_state()
