@@ -1,8 +1,9 @@
-// setup page
 function setup() {
     createAccordion();
     setup_modal();
-    window.setInterval(check_server, 3000);
+    if (typeof window.interval == 'undefined') {
+        window.interval = window.setInterval(check_server, 1000);
+    }
 }
 
 function setup_modal() {
@@ -385,7 +386,6 @@ function replaceHTML(data,places=null) {
     }
     else {
         for (var place of places) {
-            console.log(place)
             if (data[place]) {
                 if (data[place] == 'advancements' && source == 'adv_deck') {
                     deselectSelection(false);
@@ -399,8 +399,8 @@ function replaceHTML(data,places=null) {
                 $('#'+place).html(data[place]);
             }
         }
-        setup_modal();
     }
+    setup_modal();
 }
 
 function check_server() {

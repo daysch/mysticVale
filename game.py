@@ -3,8 +3,8 @@ import random
 import copy
 
 TOP_FS = 'aa0003'
-MIDDLE_FS = 'aa0004'
-BOTTOM_FS = 'aa0005'
+MIDDLE_FS = 'aa0005'
+BOTTOM_FS = 'aa0004'
 
 COLORS = ['green','blue','yellow','red']
 
@@ -504,7 +504,7 @@ class Game:
             while None in pile:
                 pile.remove(None)
 
-        if len(self.adv_ones) < 3:
+        while len(self.adv_ones) < 3:
                 self.adv_ones.append(self.adv_twos.pop(3))
 
         # update whose turn
