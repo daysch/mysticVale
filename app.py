@@ -6,6 +6,7 @@ import game
 import pickle
 from helpers import apology, jinja_debug, render_field
 from pympler import asizeof
+import os
 
 
 # Configure application
@@ -234,3 +235,6 @@ def reload_update_known():
     session['known_players_turn'] = gamer.get_players_turn()
     session['known_adv_state'] = gamer.get_adv_state()
     session['known_vale_state'] = gamer.get_vale_state()
+
+if __name__ == '__main__':
+    app.run(port=5000)
