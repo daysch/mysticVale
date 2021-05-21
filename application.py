@@ -3,6 +3,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 import time
 import game
+import pickle
 from helpers import apology, jinja_debug, render_field
 from pympler import asizeof
 
@@ -92,6 +93,18 @@ def buy():
         return jsonify(gamer.add_vale(session['id'],request.args.get('valeID')))
     return jsonify(None)
 
+@app.route("/load_game",methods=["POST"])
+def load_game():
+    global gamer
+    if not gamer.players:
+        with open('saved_game', 'rb') as infile:
+            gamer = pickle.load(infile)
+            print('loaded')
+    for player in gamer.players.values():
+        if player.name == session['name']:
+            session['id'] = player.id
+            return redirect('/play')
+
 @app.route("/move")
 def move():
     data = gamer.move(request.args.get('item'),request.args.get('source'),request.args.get('destination'),session['id'],request.args.get('source_card'))
@@ -108,6 +121,7 @@ def move():
                     'num_vales':len(state['vales']),
                     'num_discard':len(state['discard'])
                    })
+
 @app.route("/action")
 def action():
     if request.args.get('action') == 'push':

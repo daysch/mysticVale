@@ -1,0 +1,17 @@
+  <br>
+  <button type="button" onclick="discardField()">Discard field</button>
+  <br>
+    {% for card in state['discard'] %}
+    <span class="card">
+      <div class="cardAdv card-background">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+      </div>
+      {% for advancement in card.listify_advs() %}
+      <div class="cardAdv" id="{{advancement }}">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+      </div>
+      {% endfor %}
+      <div class="card-select"><button type="button" id="{{card.id}}" onclick="selectCard('{{card.id}}','discard')">^Select Card</button></div>
+    </span>
+    {% endfor %}
+  <br>

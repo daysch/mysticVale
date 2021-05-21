@@ -1,11 +1,9 @@
 import numpy as np
 import random
-import copy
-import pickle
 
 TOP_FS = 'aa0003'
-MIDDLE_FS = 'aa0005'
-BOTTOM_FS = 'aa0004'
+MIDDLE_FS = 'aa0004'
+BOTTOM_FS = 'aa0005'
 
 COLORS = ['green','blue','yellow','red']
 
@@ -68,7 +66,6 @@ class Player:
         self.leader = None
         self.turn_status = 0
         self.history = []
-        self.game_state = 1
 
     def new_game(self):
         self.deck = [Card('c' + str(i)) for i in range(8)] + \
@@ -88,9 +85,6 @@ class Player:
             self.color = random.choice(COLORS)
         self.is_first = False
         self.turn_status = 0
-        self.history = []
-        self.game_state = 1
-        self.save_state()
 
     def play_on_deck(self):
         # if no on deck card (via html glitch), do nothing
@@ -99,7 +93,6 @@ class Player:
 
         # update turn status
         self.turn_status += 1
-        self.save_state()
 
         # add card to field
         self.field[self.on_deck.id] = self.on_deck
@@ -116,47 +109,40 @@ class Player:
 
         # update turn status
         self.turn_status += 1
-        self.save_state()
 
-        # if dont already have on deck card (no glitch in html)
+        # if dont already have on deck card (no glitch in html), draw
         if not self.on_deck:
-            # if deck is empty, shuffle deck instead of flipping
             if not self.deck:
                 self.deck = self.discard
                 random.shuffle(self.deck)
                 self.discard = []
-                return {'shuffled':True}
-            # otherwise, flip
             self.on_deck = self.deck.pop()
-        return {'card':self.on_deck.dictify(), 'remaining':len(self.deck),'shuffled':False}
+        return {'card':self.on_deck.dictify(), 'remaining':len(self.deck)}
 
     def shuffle(self):
-        # update turn status
-        self.turn_status += 1
-        self.save_state()
-
         if self.on_deck:
             self.deck.append(self.on_deck)
         self.on_deck = None
         random.shuffle(self.deck)
 
+        # update turn status
+        self.turn_status += 1
+
         return self.color
 
     def make_on_deck(self,card):
-        # update turn status
-        self.turn_status += 1
-        self.save_state()
-
         if self.on_deck:
             self.deck.append(self.on_deck)
         self.on_deck = card
 
-    def make_deck_bottom(self,card):
         # update turn status
         self.turn_status += 1
-        self.save_state()
 
+    def make_deck_bottom(self,card):
         self.deck.insert(0,card)
+
+        # update turn status
+        self.turn_status += 1
 
     def flip_token(self):
         self.token = not self.token
@@ -170,22 +156,18 @@ class Player:
         # update turn status
         self.turn_status += 1
 
-        return len(self.vales)
-
     def add_advancement(self,card,advancement):
         self.field[card].add(advancement)
 
         # update turn status
         self.turn_status += 1
 
-    def discard_field(self,save_state=True):
-        # update turn status
-        if save_state:
-            self.turn_status += 1
-            self.save_state()
-
+    def discard_field(self):
         self.discard.extend(list(self.field.values()))
         self.field = dict()
+
+        # update turn status
+        self.turn_status += 1
 
     def deck_cards(self):
         return [card.id for card in self.deck]
@@ -194,10 +176,6 @@ class Player:
         return [card.id for card in self.deck]
 
     def discard_card(self,card):
-        # update turn status
-        self.turn_status += 1
-        self.save_state()
-
         if isinstance(card,Card):
             self.discard.append(card)
         elif card in self.field:
@@ -208,12 +186,14 @@ class Player:
         else:
             raise Exception('Invalid discard attempt')
 
-    def discard_vale(self,vale):
         # update turn status
         self.turn_status += 1
-        self.save_state()
 
+    def discard_vale(self,vale):
         del self.vales[vale]
+
+        # update turn status
+        self.turn_status += 1
 
     def score_points(self,points):
         self.points += points
@@ -239,10 +219,9 @@ class Player:
         self.turn_status += 1
         return self.leader
 
-    def save_state(self):
-        state = {'deck':copy.deepcopy(self.deck),'field':copy.deepcopy(self.field),'discard':copy.deepcopy(self.discard),
-                 'on_deck':copy.deepcopy(self.on_deck),'vales':copy.deepcopy(self.vales),'points':self.points,
-                 'game_state':self.game_state, 'turn_status':self.turn_status}
+    def save_state(self,game_state=None):
+        state = {'deck':self.deck,'field':self.field,'discard':self.discard,'on_deck':self.on_deck,'vales':self.vales,
+                 'points':self.points,'game_state':game_state}
         self.history.append(state)
 
     def restore_state(self, delta_state):
@@ -250,38 +229,12 @@ class Player:
             return False
 
         state = self.history[-delta_state]
-        self.history = self.history[0:-delta_state]
 
         # restore to state
-        self.deck = state['deck']
-        self.field = state['field']
-        self.discard = state['discard']
-        self.on_deck = state['on_deck']
-        self.vales = state['vales']
-        self.game_state = state['game_state']
-        delta_points = self.points - state['points']
-        self.points = state['points']
-        self.turn_status = state['turn_status']
-
-        # update turn status
-        self.turn_status += 1
-
-        return {'delta_points':delta_points,'game_state':state['game_state']}
-
-    def ret_to_game_state(self, game_state):
-        if game_state == self.game_state:
-            return
-        reverse_history = self.history[::-1]
-        for i, state in enumerate(reverse_history):
-            if state['game_state'] <= game_state:
-                self.restore_state(i+1)
-                return
-
-    def update_game_state(self,game_state):
-        self.game_state = game_state
+        self.deck = state
 
     def end_turn(self):
-        self.discard_field(save_state=False)
+        self.discard_field()
         self.turn_status = 0
 
 class Game:
@@ -291,9 +244,6 @@ class Game:
         self.players_turn = 0
         self.in_progress = False
         self.using_leaders = False
-        self.history = []
-        self.vale_state = 0
-        self.adv_state = 0
 
         self.adv_ones = []
         self.adv_twos = []
@@ -331,16 +281,14 @@ class Game:
         for player in self.players.values():
             player.new_game()
 
-        self.vale_state = 0
-        self.adv_state = 0
         self.players_turn = random.choice(list(self.players.keys()))
         self.players[self.players_turn].is_first = True
         self.in_progress = True
-        self.history = []
-        self.save_state()
 
     # move items places
     def move(self,item,source,destination,player,source_card=None):
+        return_value = (None, item)
+
         # buying advancement
         if source == 'adv_deck' and destination[0] == 'c':
             return self.add_advancement(player,destination,item)
@@ -403,6 +351,9 @@ class Game:
             destination[item] = item
             source.remove(item)
 
+        # return next advancement, if necessary
+        return return_value
+
     def add_points(self,points):
         self.points_left += int(points)
         return self.points_left
@@ -430,8 +381,6 @@ class Game:
                 'random_deck':list(np.random.permutation(self.players[id].deck)),
                 'adv_ones_left':len(self.adv_ones) - 3,
                 'using_leaders':self.using_leaders,
-                'vale_state':self.vale_state,
-                'adv_state':self.adv_state,
                 'player_ids': [player for player in self.players if player != id],
                 'players_turn':None if pt.id == id else self.get_other_state(pt.id),
                 'other_players': [self.get_other_state(player) for player in self.players if player != id and player != self.players_turn]}
@@ -446,11 +395,6 @@ class Game:
         return [player.name for player in self.players.values()]
 
     def add_advancement(self,player,card,advancement):
-        # save state
-        self.players[player].save_state()
-        self.save_state()
-        self.adv_state += 1
-
         # initiate return value
         remainder = None
 
@@ -460,11 +404,13 @@ class Game:
             remainder = self.fertile_soils[advancement]
             advancement = advancement + str(self.fertile_soils[advancement])
         elif advancement[1] == 'a' or advancement in self.adv_ones:
-            self.adv_ones[self.adv_ones.index(advancement)] = None
+            self.adv_ones.remove(advancement)
+            if len(self.adv_ones) < 3:
+                self.adv_ones.append(self.adv_twos.pop(3))
         elif advancement[1] == 'b':
-            self.adv_twos[self.adv_twos.index(advancement)] = None
+            self.adv_twos.remove(advancement)
         else:
-            self.adv_threes[self.adv_threes.index(advancement)] = None
+            self.adv_threes.remove(advancement)
 
         # add advancement to card
         self.players[player].add_advancement(card,advancement)
@@ -473,49 +419,27 @@ class Game:
         return remainder, advancement
 
     def add_vale(self, player, vale):
-        # save state
-        self.players[player].save_state()
-        self.save_state()
-        self.vale_state += 1
-
         # give vale card to player
-        vales_owned = self.players[player].add_vale(vale)
+        self.players[player].add_vale(vale)
 
         # remove vale from deck
         if vale[1] == 'a':
-            self.vale_ones[self.vale_ones.index(vale)] = None
+            self.vale_ones.remove(vale)
+            return self.vale_ones[3]
         else:
-            self.vale_twos[self.vale_twos.index(vale)] = None
-
-        return vales_owned
+            self.vale_twos.remove(vale)
+            return self.vale_twos[3]
 
     def end_turn(self,player):
-        # save state
-        self.players[player].save_state()
-        self.save_state()
-
         # discard field
         self.players[player].end_turn()
 
         if self.players_turn != player:
             return
 
-        # update advancements/vales available
-        for pile in [self.adv_ones,self.adv_twos,self.adv_threes,self.vale_ones,self.vale_twos]:
-            while None in pile:
-                pile.remove(None)
-
-        while len(self.adv_ones) < 3:
-                self.adv_ones.append(self.adv_twos.pop(3))
-
         # update whose turn
         idx = (list(self.players.keys()).index(self.players_turn) + 1) % len(self.players)
         self.players_turn = list(self.players.keys())[idx]
-        self.save_game()
-
-    def save_game(self):
-        with open("saved_game","wb") as outfile:
-            pickle.dump(self, outfile)
 
     def end_game(self):
         self.players = dict()
@@ -554,12 +478,6 @@ class Game:
     def get_turn_status(self,id):
         return self.players[int(id)].turn_status
 
-    def get_vale_state(self):
-        return self.vale_state
-
-    def get_adv_state(self):
-        return self.adv_state
-
     def get_players_turn(self):
         return self.players_turn
 
@@ -581,33 +499,3 @@ class Game:
 
     def discard_field(self,id):
         return self.players[id].discard_field()
-
-    def save_state(self):
-        state = {'adv_ones':copy.deepcopy(self.adv_ones),'adv_twos':copy.deepcopy(self.adv_twos),
-                 'adv_threes':copy.deepcopy(self.adv_threes), 'vale_ones':copy.deepcopy(self.vale_ones),
-                 'vale_twos':copy.deepcopy(self.vale_twos),'players_turn':self.players_turn,
-                 'fertile_soils':copy.deepcopy(self.fertile_soils)}
-        self.history.append(state)
-
-        for player in self.players.values():
-            player.update_game_state(len(self.history))
-
-    def restore_state(self, player, delta_state):
-        # restore player state
-        changes = self.players[player].restore_state(delta_state)
-
-        # if necessary, restore game state
-        if changes and changes['game_state'] < len(self.history):
-            state = self.history[changes['game_state']]
-            self.history = self.history[0:changes['game_state']]
-            self.adv_ones = state['adv_ones']
-            self.adv_twos = state['adv_twos']
-            self.adv_threes = state['adv_threes']
-            self.vale_ones = state['vale_ones']
-            self.vale_twos = state['vale_twos']
-            self.players_turn = state['players_turn']
-            self.fertile_soils = state['fertile_soils']
-
-            # restore player states
-            for player in self.players.values():
-                player.ret_to_game_state(changes['game_state'])

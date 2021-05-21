@@ -1,0 +1,23 @@
+<br>
+  <button type="button" id="move-to-purgatory" onclick="moveToPurgatory()" disabled>Move to Purgatory</button>
+  <br>
+    {% for card in state['purgatory']['cards'].values() %}
+    <span class="card">
+      <div class="cardAdv card-background">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="advancement">
+      </div>
+      {% for advancement in card.listify_advs() %}
+      <div class="cardAdv" id="{{advancement }}">
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{advancement[0:6]}}.png" class="advancement">
+      </div>
+      {% endfor %}
+      <div class="card-select"><button type="button" id="{{card.id}}" onclick="selectCard('{{card.id}}','purgatory')">^Select Card</button></div>
+    </span>
+    {% endfor %}
+
+    <div style="float:left;width:100%" id="others">
+    {% for other in state['purgatory']['others'] %}
+      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{other[0:([6,other|length]|min)]}}.png" class="vale" style="width:15%" id ="{{ other }}" onclick="{{'selectVale(' if other[0] == 'v' else 'selectAdv('}}'{{other}}','purgatory')">
+    {% endfor %}
+  </div>
+  <br>

@@ -1,0 +1,10 @@
+  <div style="width:100%">
+    <button type="button" id="discard-vale" disabled onclick="discardVale()">Discard vale</button>
+    <br>
+    <button type="button" id="move-to-vales" disabled onclick="moveToVales()">Move to your vales</button>
+    <br>
+    {% for vale in state['vales'] %}
+      <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale}}.png" class="vale" style="width:15%" id ="{{ vale}}" onclick="selectVale('{{vale}}','vales')">
+    {% endfor %}
+  </div>
+  <br>

@@ -1,0 +1,45 @@
+  <div class="col-container">
+    <div class="col" style="background:#DCDCDC">
+        {% for adv1 in state['adv_ones'] %}
+          {% if adv1 %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv1}}.png" class="buyable-adv" id="{{adv1}}" onclick="selectAdv('{{adv1}}','adv_deck')">
+          {% else %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="buyable-adv">
+           {% endif %}
+        {% endfor %}
+        <br>
+        <div style="text-align:center">{{state['adv_ones_left']}} level ones left</div>
+    </div>
+    <div class="col" style="background:#F8F8F8">
+        {% for adv2 in state['adv_twos'] %}
+          {% if adv2 %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv2}}.png" class="buyable-adv" id="{{adv2}}" onclick="selectAdv('{{adv2}}','adv_deck')">
+          {% else %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="buyable-adv">
+          {% endif %}
+        {% endfor %}
+    </div>
+    <div class="col" style="background:#DCDCDC">
+        {% for adv3 in state['adv_threes'] %}
+          {% if adv3 %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/{{adv3}}.png" class="buyable-adv" id="{{adv3}}" onclick="selectAdv('{{adv3}}','adv_deck')">
+          {% else %}
+            <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="buyable-adv">
+          {% endif %}
+        {% endfor %}
+    </div>
+    <div class="col" style="background:#F8F8F8">
+      <div class="col-container">
+        {% for fs in state['fertile_soils'] %}
+          <div class="col">
+            {% if state['fertile_soils'][fs] %}
+                <img src="https://flaskdixit.files.wordpress.com/2020/08/{{fs}}.png" class="fertile-soil" id="{{fs}}" onclick="selectAdv('{{fs}}','adv_deck')">
+                <figcaption style="text-align:center">{{state['fertile_soils'][fs]}} left</figcaption>
+            {% else %}
+                <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="fertile-soil">
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,18 @@
+  <div style="float:left;width:30%;background:#C0C0C0;text-align:center">
+    {% for vale1 in state['vale_ones'] %}
+      {% if vale1 %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale1}}.png" class="vale" id ="{{vale1}}" onclick="buyVale('{{vale1}}')">
+      {% else %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="vale">
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div style="float:left;width:30%;background:#999966;text-align:center">
+    {% for vale2 in state['vale_twos'] %}
+      {% if vale2 %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/{{vale2}}.png" class="vale" id ="{{vale2}}" onclick="buyVale('{{vale2}}')">
+      {% else %}
+        <img src="https://flaskdixit.files.wordpress.com/2020/08/blank_advancement.png" class="vale">
+      {% endif %}
+    {% endfor %}
+  </div>

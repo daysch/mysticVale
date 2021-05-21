@@ -20,6 +20,7 @@
         <br>
         <a href="/play" class="btn btn-primary">Start Game </a>
     {% endif %}
+    <form action="/load_game" method="post" id="form1"></form>
     <br>
     <br>
     Players ({{players|length}}):
@@ -28,6 +29,12 @@
         {{name}}
 
     {% endfor %}
+    <br>
+    <br>
+    <br>
+    <button type="submit" form="form1" value="Submit">Load Saved Game</button>
+    <br>
+    Everyone should hit load saved game <b>without</b> hitting join game.
 
 <script>
     // Will execute every 1 second

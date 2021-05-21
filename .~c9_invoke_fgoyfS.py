@@ -1,7 +1,6 @@
 import numpy as np
 import random
 import copy
-import pickle
 
 TOP_FS = 'aa0003'
 MIDDLE_FS = 'aa0005'
@@ -505,17 +504,12 @@ class Game:
             while None in pile:
                 pile.remove(None)
 
-        while len(self.adv_ones) < 3:
+        if len(self.adv_ones) < 3:
                 self.adv_ones.append(self.adv_twos.pop(3))
 
         # update whose turn
         idx = (list(self.players.keys()).index(self.players_turn) + 1) % len(self.players)
         self.players_turn = list(self.players.keys())[idx]
-        self.save_game()
-
-    def save_game(self):
-        with open("saved_game","wb") as outfile:
-            pickle.dump(self, outfile)
 
     def end_game(self):
         self.players = dict()
